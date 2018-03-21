@@ -1,0 +1,43 @@
+#Folders
+.vscode/
+navigation_msgs/
+colormap/
+driver_common-indigo-devel/
+laser/
+lidar_segmentation/
+pointgrey_camera_driver-master/
+sick_ldmrs/
+velodyne-master/
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
