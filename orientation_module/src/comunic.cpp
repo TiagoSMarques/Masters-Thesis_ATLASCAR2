@@ -43,14 +43,19 @@ void printData(const std_msgs::Float32MultiArray::ConstPtr& msg)
   float roll = msg->data[1] * 3.1415 / 180;
   // float z_mean = msg->data[2];
 
-  ROS_INFO("Pitch = %f", pitch);
-  ROS_INFO("Roll = %f", roll);
+  // ROS_INFO("Pitch = %f", pitch);
+  // ROS_INFO("Roll = %f", roll);
 
   // Criar a transformação entre chassis e estrada
   static tf::TransformBroadcaster br;
   tf::Transform transform;
 
-  transform.setOrigin(tf::Vector3(0.0, 0.0, 3));
+  transform.setOrigin(tf::Vector3(0, 0, 0.28));
+  // roll = -3.1415 / 10;
+  pitch = -3.1415 / 10;
+
+  roll = 0;
+  // pitch = 0;
   transform.setRotation(tf::createQuaternionFromRPY(roll, pitch, 0));
 
   // publicar a tranformada entre o chassis do carro e a estrada

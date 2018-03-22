@@ -31,6 +31,7 @@
    \date   June, 2017
  */
 
+#include <tf/transform_listener.h>
 #include "free_space_detection/device_frame_publisher.h"
 
 /**
@@ -270,16 +271,36 @@ int main(int argc, char **argv)
   ROS_INFO("Ref sensor: %s", ref_sensor.c_str());
 
   tf::Transform transform_acerto;
+  tf::Transform transform_final;
   tf::StampedTransform transform_novo;
   tf::TransformListener listener_novo;
 
   ros::Rate loop_rate(50);
   while (ros::ok())
   {
-    listener_novo.lookupTransform("/map", "/car_center", ros::Time(0), transform_novo);
-    // br.sendTransform(tf::StampedTransform(transform_novo, ros::Time::now(), "car_center", "moving_axis"));
+    try
+    {
+      listener_novo.lookupTransform("map", "car_center", ros::Time(0), transform_novo);
+      transform_acerto = transform_novo;
+
+      transform_final.setOrigin(-transform_acerto.getOrigin());
+      // double x = -transform_acerto.getOrigin().getX();
+      // double y = -transform_acerto.getOrigin().getY();
+      // double z = -transform_acerto.getOrigin().getZ();
+      // ROS_INFO("Coord x=%f, y=%f, z=,%f", x, y, z);
+      transform_final.setRotation(tf::Quaternion(0, 0, 0, 1));
+
+      br.sendTransform(tf::StampedTransform(transform_final, ros::Time::now(), "car_center", "moving_axis"));
+    }
+    catch (tf::TransformException &ex)
+    {
+      ROS_ERROR("%s", ex.what());
+      ros::Duration(1.0).sleep();
+      continue;
+    }
+
     // Codigo antigo em vez de "car_center" tinha "map"
-    br.sendTransform(tf::StampedTransform(LD_tf.inverse(), ros::Time::now(), "car_center", ref_sensor));
+    br.sendTransform(tf::StampedTransform(LD_tf.inverse(), ros::Time::now(), "moving_axis", ref_sensor));
 
     for (int i = 0; i < deviceNames.size(); i++)
     {
