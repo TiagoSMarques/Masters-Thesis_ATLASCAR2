@@ -16,7 +16,7 @@ int main(int argc, char** argv)
     // distância total do carro: 3475
     transform.setOrigin(tf::Vector3(-(0.5 + 2.550 / 2), 0, -0.28));
     transform.setRotation(tf::Quaternion(0, 0, 0, 1));
-    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "/map", "/ground"));
+    br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "ground"));
     rate.sleep();
   }
   return 0;

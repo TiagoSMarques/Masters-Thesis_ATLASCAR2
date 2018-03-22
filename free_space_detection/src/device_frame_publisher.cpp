@@ -42,67 +42,63 @@
 */
 int getFilesInDir(const string filesPath, vector<string> &outfiles, vector<string> &filesName)
 {
+  boost::filesystem::path full_path(boost::filesystem::initial_path<boost::filesystem::path>());
 
-  boost::filesystem::path full_path( boost::filesystem::initial_path<boost::filesystem::path>() );
-
-  full_path = boost::filesystem::system_complete( boost::filesystem::path( filesPath ) );
+  full_path = boost::filesystem::system_complete(boost::filesystem::path(filesPath));
 
   unsigned long file_count = 0;
   unsigned long dir_count = 0;
   unsigned long other_count = 0;
   unsigned long err_count = 0;
 
-  if ( !boost::filesystem::exists( full_path ) )
+  if (!boost::filesystem::exists(full_path))
   {
     std::cout << "\nNot found: " << filesPath << std::endl;
     return 1;
   }
 
-  if ( boost::filesystem::is_directory( full_path ) )
+  if (boost::filesystem::is_directory(full_path))
   {
     boost::filesystem::directory_iterator end_iter;
-    for ( boost::filesystem::directory_iterator dir_itr( full_path );
-          dir_itr != end_iter;
-          ++dir_itr )
+    for (boost::filesystem::directory_iterator dir_itr(full_path); dir_itr != end_iter; ++dir_itr)
     {
       try
       {
-        if ( boost::filesystem::is_directory( dir_itr->status() ) )
+        if (boost::filesystem::is_directory(dir_itr->status()))
         {
           ++dir_count;
         }
-        else if ( boost::filesystem::is_regular_file( dir_itr->status() ) )
+        else if (boost::filesystem::is_regular_file(dir_itr->status()))
         {
           ++file_count;
           string file_name = dir_itr->path().filename().string();
           int name_len = file_name.size();
-          string file_type = file_name.substr(name_len-4,10);
-          if(strcmp( file_type.c_str(),".txt") == 0){
-            outfiles.push_back(filesPath+"/"+file_name);
-            filesName.push_back(file_name.substr(0,name_len-4));
+          string file_type = file_name.substr(name_len - 4, 10);
+          if (strcmp(file_type.c_str(), ".txt") == 0)
+          {
+            outfiles.push_back(filesPath + "/" + file_name);
+            filesName.push_back(file_name.substr(0, name_len - 4));
           }
         }
         else
         {
           ++other_count;
         }
-
       }
-      catch ( const std::exception & ex )
+      catch (const std::exception &ex)
       {
         ++err_count;
         std::cout << dir_itr->path().filename() << " " << ex.what() << std::endl;
       }
     }
   }
-  else // must be a file
+  else  // must be a file
   {
     std::cout << "\nFound: " << full_path.filename() << "\n";
   }
 
   return 0;
 }
-
 
 /**
 @brief Gets a rigid body transformation from a file
@@ -111,34 +107,32 @@ int getFilesInDir(const string filesPath, vector<string> &outfiles, vector<strin
 */
 Eigen::Matrix4f getTransformFromFile(string filePath)
 {
-
   int nrows = 4;
   int ncols = 4;
-  Eigen::MatrixX4f transform(nrows,ncols);
+  Eigen::MatrixX4f transform(nrows, ncols);
 
-  const char* FilePath = filePath.c_str();
-  ifstream fin (FilePath);
+  const char *FilePath = filePath.c_str();
+  ifstream fin(FilePath);
 
   if (fin.is_open())
   {
-      for (int row = 0; row < nrows; row++)
-          for (int col = 0; col < ncols; col++)
-          {
-              float item = 0.0;
-              fin >> item;
-              transform(row, col) = item;
-          }
-      fin.close();
+    for (int row = 0; row < nrows; row++)
+      for (int col = 0; col < ncols; col++)
+      {
+        float item = 0.0;
+        fin >> item;
+        transform(row, col) = item;
+      }
+    fin.close();
   }
-/*--- DEBUG ---
-  cout << transform(0,0) << " " << transform(0,1) << " " << transform(0,2) << " " << transform(0,3) << endl;
-  cout << transform(1,0) << " " << transform(1,1) << " " << transform(1,2) << " " << transform(1,3) << endl;
-  cout << transform(2,0) << " " << transform(2,1) << " " << transform(2,2) << " " << transform(2,3) << endl;
-  cout << transform(3,0) << " " << transform(3,1) << " " << transform(3,2) << " " << transform(3,3) << endl;
-  --- DEBUG ---*/
+  /*--- DEBUG ---
+    cout << transform(0,0) << " " << transform(0,1) << " " << transform(0,2) << " " << transform(0,3) << endl;
+    cout << transform(1,0) << " " << transform(1,1) << " " << transform(1,2) << " " << transform(1,3) << endl;
+    cout << transform(2,0) << " " << transform(2,1) << " " << transform(2,2) << " " << transform(2,3) << endl;
+    cout << transform(3,0) << " " << transform(3,1) << " " << transform(3,2) << " " << transform(3,3) << endl;
+    --- DEBUG ---*/
   return transform;
 }
-
 
 /**
 @brief Converts a rigid body matrix (Eigen::MatrixX4f) to a tf::Transform
@@ -147,16 +141,14 @@ Eigen::Matrix4f getTransformFromFile(string filePath)
 */
 tf::Transform getTfTransform(Eigen::MatrixX4f trans)
 {
-
   tf::Transform t1;
 
-  t1.setOrigin(tf::Vector3(trans(0,3),trans(1,3),trans(2,3)));
+  t1.setOrigin(tf::Vector3(trans(0, 3), trans(1, 3), trans(2, 3)));
 
   tf::Quaternion q;
   tf::Matrix3x3 ori;
-  ori.setValue(trans(0,0),trans(0,1),trans(0,2),
-               trans(1,0),trans(1,1),trans(1,2),
-               trans(2,0),trans(2,1),trans(2,2));
+  ori.setValue(trans(0, 0), trans(0, 1), trans(0, 2), trans(1, 0), trans(1, 1), trans(1, 2), trans(2, 0), trans(2, 1),
+               trans(2, 2));
   ori.getRotation(q);
 
   t1.setRotation(q);
@@ -169,8 +161,9 @@ tf::Transform getTfTransform(Eigen::MatrixX4f trans)
 @param[in] Angle in degrees
 @return double Returns an angle in radians
 */
-double degToRad(double deg){
-  double rad = deg*M_PI/180;
+double degToRad(double deg)
+{
+  double rad = deg * M_PI / 180;
   return rad;
 }
 
@@ -186,11 +179,10 @@ double degToRad(double deg){
 */
 tf::Transform getTf(double x, double y, double z, double r, double p, double yy)
 {
-
   tf::Transform t1;
-  t1.setOrigin(tf::Vector3(x,y,z));
+  t1.setOrigin(tf::Vector3(x, y, z));
   tf::Quaternion q;
-  q.setRPY(degToRad(r),degToRad(p),degToRad(yy));
+  q.setRPY(degToRad(r), degToRad(p), degToRad(yy));
   t1.setRotation(q);
 
   return t1;
@@ -205,7 +197,6 @@ tf::Transform getTf(double x, double y, double z, double r, double p, double yy)
 */
 void readCalibrationFiles(string filesPath, vector<tf::Transform> &deviceFrames, vector<string> &deviceNames)
 {
-
   vector<string> files;
   getFilesInDir(filesPath, files, deviceNames);
 
@@ -213,32 +204,33 @@ void readCalibrationFiles(string filesPath, vector<tf::Transform> &deviceFrames,
   bool ld_push = false;
   tf::Transform transform;
 
-  for(int i = 0; i<files.size(); i++){
+  for (int i = 0; i < files.size(); i++)
+  {
+    transform = getTfTransform(getTransformFromFile(files[i]));
 
-
-    transform = getTfTransform( getTransformFromFile(files[i]) );
-
-    if(deviceNames[i] == "ldmrs"){
+    if (deviceNames[i] == "ldmrs")
+    {
       deviceNames[i] = "ldmrs0";
-      deviceFrames.push_back(transform*getTf(0, 0, 0, 0, -1.6, 0));
+      deviceFrames.push_back(transform * getTf(0, 0, 0, 0, -1.6, 0));
       ld_tf = transform;
       ld_push = true;
-
-    }else{
+    }
+    else
+    {
       deviceFrames.push_back(transform);
     }
-
   }
 
-  if(ld_push){
+  if (ld_push)
+  {
     deviceNames.push_back("ldmrs1");
     deviceNames.push_back("ldmrs2");
     deviceNames.push_back("ldmrs3");
 
-    deviceFrames.push_back(ld_tf*getTf(0, 0, 0, 0, -0.8, 0));
-    deviceFrames.push_back(ld_tf*getTf(0, 0, 0, 0, 0.8, 0));
-    deviceFrames.push_back(ld_tf*getTf(0, 0, 0, 0, 1.6, 0));
-    //deviceFrames.push_back(ld_tf);
+    deviceFrames.push_back(ld_tf * getTf(0, 0, 0, 0, -0.8, 0));
+    deviceFrames.push_back(ld_tf * getTf(0, 0, 0, 0, 0.8, 0));
+    deviceFrames.push_back(ld_tf * getTf(0, 0, 0, 0, 1.6, 0));
+    // deviceFrames.push_back(ld_tf);
   }
 }
 
@@ -255,46 +247,55 @@ int main(int argc, char **argv)
   tf::TransformBroadcaster br;
 
   string calibFilesP;
-  if(!nh.getParam("calibFilesPath",calibFilesP)){
-    calibFilesP = ros::package::getPath("free_space_detection")+"/calibration_data";
+  if (!nh.getParam("calibFilesPath", calibFilesP))
+  {
+    calibFilesP = ros::package::getPath("free_space_detection") + "/calibration_data";
   }
-  ROS_INFO("Calibration Files Path: %s",calibFilesP.c_str());
+  ROS_INFO("Calibration Files Path: %s", calibFilesP.c_str());
 
   vector<tf::Transform> deviceFrames;
   vector<string> deviceNames;
-  readCalibrationFiles(calibFilesP.c_str(),
-                       deviceFrames, deviceNames);
+  readCalibrationFiles(calibFilesP.c_str(), deviceFrames, deviceNames);
 
+  tf::Transform LD_tf = deviceFrames[deviceFrames.size() - 1] * getTf(0, 0, 0, 0, -1.6, 0);
 
-  tf::Transform LD_tf = deviceFrames[deviceFrames.size()-1]*getTf(0, 0, 0, 0, -1.6, 0);
-
-//  deviceFrames.push_back(getTf(0, 0, 0.5, 0, 0, 0));
-//  deviceNames.push_back("velodyne");
-
+  //  deviceFrames.push_back(getTf(0, 0, 0.5, 0, 0, 0));
+  //  deviceNames.push_back("velodyne");
 
   string ref_sensor = "lms151_E";
-  if(!nh.getParam("ref_sensor",ref_sensor)){
+  if (!nh.getParam("ref_sensor", ref_sensor))
+  {
     ROS_WARN("Param 'ref_sensor' not found!");
   }
   ROS_INFO("Ref sensor: %s", ref_sensor.c_str());
 
+  tf::Transform transform_acerto;
+  tf::StampedTransform transform_novo;
+  tf::TransformListener listener_novo;
+
   ros::Rate loop_rate(50);
-  while(ros::ok()){
-    br.sendTransform(tf::StampedTransform(LD_tf.inverse(), ros::Time::now(),"map",ref_sensor));
-//    br.sendTransform(tf::StampedTransform(getTf(0, 0, 0.5, 0, 0, 0), ros::Time::now(),"map","velodyne"));
-    for(int i = 0; i<deviceNames.size(); i++){
+  while (ros::ok())
+  {
+    listener_novo.lookupTransform("/map", "/car_center", ros::Time(0), transform_novo);
+    // br.sendTransform(tf::StampedTransform(transform_novo, ros::Time::now(), "car_center", "moving_axis"));
+    // Codigo antigo em vez de "car_center" tinha "map"
+    br.sendTransform(tf::StampedTransform(LD_tf.inverse(), ros::Time::now(), "car_center", ref_sensor));
+
+    for (int i = 0; i < deviceNames.size(); i++)
+    {
       tf::Transform T = deviceFrames[i];
       string name = deviceNames[i];
-      if(name == "velodyne"){
-        br.sendTransform(tf::StampedTransform(T, ros::Time::now(),name,"map"));
-      }else{
-        br.sendTransform(tf::StampedTransform(T, ros::Time::now(),ref_sensor,name));
+      if (name == "velodyne")
+      {
+        br.sendTransform(tf::StampedTransform(T, ros::Time::now(), name, "map"));
       }
-
+      else
+      {
+        br.sendTransform(tf::StampedTransform(T, ros::Time::now(), ref_sensor, name));
+      }
     }
 
     ros::spinOnce();
     loop_rate.sleep();
   }
-
 }
