@@ -280,16 +280,15 @@ int main(int argc, char **argv)
   {
     try
     {
+      // transformação entre o referencial mundo e o centro do carro
       listener_novo.lookupTransform("map", "car_center", ros::Time(0), transform_novo);
       transform_acerto = transform_novo;
 
+      // Vetor entre a origem do mundo e a origem do ref do centro do carro com a mesma rotação
       transform_final.setOrigin(-transform_acerto.getOrigin());
-      // double x = -transform_acerto.getOrigin().getX();
-      // double y = -transform_acerto.getOrigin().getY();
-      // double z = -transform_acerto.getOrigin().getZ();
-      // ROS_INFO("Coord x=%f, y=%f, z=,%f", x, y, z);
       transform_final.setRotation(tf::Quaternion(0, 0, 0, 1));
 
+      // Criar um referencial novo que irá servir como referencial base de todos os sensores
       br.sendTransform(tf::StampedTransform(transform_final, ros::Time::now(), "car_center", "moving_axis"));
     }
     catch (tf::TransformException &ex)
@@ -299,9 +298,10 @@ int main(int argc, char **argv)
       continue;
     }
 
-    // Codigo antigo em vez de "car_center" tinha "map"
+    // Associar ao sensor referência o referencial base
     br.sendTransform(tf::StampedTransform(LD_tf.inverse(), ros::Time::now(), "moving_axis", ref_sensor));
 
+    // Criar os referenciais dos respetivos sensores baseado nas informações dos ficheiros de calibração
     for (int i = 0; i < deviceNames.size(); i++)
     {
       tf::Transform T = deviceFrames[i];

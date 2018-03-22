@@ -42,12 +42,6 @@ float sensor2Vallc = 0;
 float sensor3Vallc = 0;
 float sensor4Vallc = 0;
 
-// Definir variavel de leitura de distÃ¢ncia
-// float sensor1Vallcc = 0;
-// float sensor2Vallcc = 0;
-// float sensor3Vallcc = 0;
-// float sensor4Vallcc = 0;
-
 // Valor maximo gama ADC
 float declive1 = 0;
 float declive2 = 0;
@@ -153,11 +147,6 @@ void loop()
   sensor3Vallc = sensor3Vallc + sensor3Val;
   sensor4Vallc = sensor4Vallc + sensor4Val;
 
-  // sensor1Vallcc = sensor1Vallc / counter1;
-  // sensor2Vallcc = sensor2Vallc / counter1;
-  // sensor3Vallcc = sensor3Vallc / counter1;
-  // sensor4Vallcc = sensor4Vallc / counter1;
-
   sensor1Vallc = 0;
   sensor2Vallc = 0;
   sensor3Vallc = 0;
@@ -167,11 +156,6 @@ void loop()
   sensor2Vall = sensor2Val * 0.977520;
   sensor3Vall = sensor3Val * 0.977520;
   sensor4Vall = sensor4Val * 0.977520;
-
-  // sensor1Vallcc = 0;
-  // sensor2Vallcc = 0;
-  // sensor3Vallcc = 0;
-  // sensor4Vallcc = 0;
 
   // conversão entre a leitura do sensor em V e a distancia em mm
   sensor1Vall = (0.613800 * sensor1Vall) + 75.801000;
@@ -263,17 +247,6 @@ void loop()
   lcd.print("Roll:");
   lcd.print(roll, 5);
 
-  // if (calival == 1)
-  // {
-  //   pitch = 87;
-  //   roll = 34;
-  // }
-  // else
-  // {
-  //   pitch = 50;
-  //   roll = 30;
-  // }
-
   float z_mean = (sensor1Vall + sensor2Vall + sensor3Vall + sensor4Vall) / 4;
 
   DadosInclin.data[0] = pitch;
@@ -286,7 +259,8 @@ void loop()
   //  ROS_INFO("Pitch: %f, Roll: %f");
 
   nh.spinOnce();
-  delay(1000);
+  // 50Hz
+  delay(20);
 }
 
 // distancia (mm)
