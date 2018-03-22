@@ -8,8 +8,13 @@
   <!--Launch the visualization-->
   <node pkg="rviz" type="rviz" name="rviz" args="--display-config $(find free_space_detection)/config/rviz.rviz" required="true"/>
   <!-- Launch the node   -->
-  <!-- <node pkg="free_space_detection" type="free_space_detection_node" name="free_space_detection" required="true" output="screen"/> -->
   <node pkg="free_space_detection" type="device_frame_publisher_node" name="device_frame_publisher" required="true" output="screen"/>
+  <!-- Launch the node   -->
+  <node pkg="orientation_module" type="frame_tf_broadcaster" name="frame_tf_broadcaster" required="true" output="screen"/>
+  <!-- Launch the node   -->
+  <node pkg="orientation_module" type="orientation_module_node" name="comunic" required="true" output="screen"/>
+  <!-- Launch the node   -->
+  <!-- <node pkg="free_space_detection" type="free_space_detection_node" name="free_space_detection" required="true" output="screen"/> -->
   <!-- Launch the tf publisher
   <node pkg="tf" type="static_transform_publisher" name="root_broadcaster" args="0 0 0 0 0 0 1 map root 100" /><node pkg="tf" type="static_transform_publisher" name="lms151_D_broadcaster" args="0 -0.8 0 0 0 -0.43 1 root lms151_D 100" /><node pkg="tf" type="static_transform_publisher" name="lms151_E_broadcaster" args="0 0.8 0 0 0 0.43 1 root lms151_E 100" /><node pkg="tf" type="static_transform_publisher" name="ldmrs0_broadcaster" args="0 0 0 0 0 0 1 root ldmrs0 100" /><node pkg="tf" type="static_transform_publisher" name="ldmrs1_broadcaster" args="0 0 0 0 0 0 1 root ldmrs1 100" /><node pkg="tf" type="static_transform_publisher" name="ldmrs2_broadcaster" args="0 0 0 0 0 0 1 root ldmrs2 100" /><node pkg="tf" type="static_transform_publisher" name="ldmrs3_broadcaster" args="0 0 0 0 0 0 1 root ldmrs3 100" /> -->
   <!--Launch the recorder-->

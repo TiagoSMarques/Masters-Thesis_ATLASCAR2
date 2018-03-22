@@ -38,9 +38,10 @@ void printData(const std_msgs::Float32MultiArray::ConstPtr& msg)
   // ROS_INFO("Pitch =  %f", msg->data[0 + dstride1 * 0]);
   // ROS_INFO("Roll = %f", msg->data[0 + dstride1 * 1]);
 
-  float pitch = msg->data[0];
-  float roll = msg->data[1];
-  float z_mean = msg->data[2];
+  // Receber e converter para radianos
+  float pitch = msg->data[0] * 3.1415 / 180;
+  float roll = msg->data[1] * 3.1415 / 180;
+  // float z_mean = msg->data[2];
 
   ROS_INFO("Pitch = %f", pitch);
   ROS_INFO("Roll = %f", roll);
@@ -49,11 +50,11 @@ void printData(const std_msgs::Float32MultiArray::ConstPtr& msg)
   static tf::TransformBroadcaster br;
   tf::Transform transform;
 
-  transform.setOrigin(tf::Vector3(0.0, 0.0, z_mean));
+  transform.setOrigin(tf::Vector3(0.0, 0.0, 3));
   transform.setRotation(tf::createQuaternionFromRPY(roll, pitch, 0));
 
   // publicar a tranformada entre o chassis do carro e a estrada
-  br.sendTransform(tf::StampedTransform(transform, Time::now(), "/ground", "/atc/vehicle/center_car_axis"));
+  br.sendTransform(tf::StampedTransform(transform, Time::now(), "/ground", "/car_center"));
 }
 
 int main(int argc, char** argv)
