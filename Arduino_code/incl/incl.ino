@@ -11,6 +11,7 @@
 #include <math.h>
 
 int count = 0;
+int count_display=0;
 
 // Definir entradas do LCD
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
@@ -235,6 +236,7 @@ void loop()
 
   roll = (roll_1 + roll_2) / 2;
 
+if (count_display==25){
   lcd.clear();
   lcd.setCursor(0, 0);
   //*************************
@@ -246,6 +248,11 @@ void loop()
   //****************************
   lcd.print("Roll:");
   lcd.print(roll, 5);
+  count_display=0;
+  }
+  else{
+  count_display++;
+  }
 
   float z_mean = (sensor1Vall + sensor2Vall + sensor3Vall + sensor4Vall) / 4;
 

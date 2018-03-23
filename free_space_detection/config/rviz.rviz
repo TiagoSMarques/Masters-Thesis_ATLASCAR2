@@ -85,19 +85,18 @@ Visualization Manager:
         map:
           ground:
             car_center:
-              lms151_E:
-                ldmrs0:
-                  {}
-                ldmrs1:
-                  {}
-                ldmrs2:
-                  {}
-                ldmrs3:
-                  {}
-                lms151_D:
-                  {}
               moving_axis:
-                {}
+                lms151_E:
+                  ldmrs0:
+                    {}
+                  ldmrs1:
+                    {}
+                  ldmrs2:
+                    {}
+                  ldmrs3:
+                    {}
+                  lms151_D:
+                    {}
       Update Interval: 1
       Value: true
     - Alpha: 1
@@ -595,23 +594,18 @@ Visualization Manager:
     - Alpha: 1
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: true
+      Enabled: false
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        map:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Name: ATLASCAR 2
       Robot Description: ATLASCAR2
       TF Prefix: ""
       Update Interval: 0
-      Value: true
+      Value: false
       Visual Enabled: true
     - Alpha: 0.699999988
       Class: rviz/Map
@@ -713,5 +707,5 @@ Window Geometry:
   Tool Properties:
     collapsed: false
   Width: 1537
-  X: 211
+  X: 210
   Y: 28

@@ -51,11 +51,11 @@ void printData(const std_msgs::Float32MultiArray::ConstPtr& msg)
   tf::Transform transform;
 
   // aqui depois colocar zmean
-  transform.setOrigin(tf::Vector3(0, 0, 0.28));
+  transform.setOrigin(tf::Vector3(0, 0, 0.24));
   // roll = -3.1415 / 10;
-  // pitch = -3.1415 / 10;
+  // float pitch = -3.1415 / 10;
 
-  // roll = 0;
+  // float roll = 0;
   // pitch = 0;
   transform.setRotation(tf::createQuaternionFromRPY(roll, pitch, 0));
 

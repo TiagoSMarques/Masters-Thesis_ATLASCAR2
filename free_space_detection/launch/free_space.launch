@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <!-- -->
 <launch>
+  <!-- Usar isto quando se usam bags ou usar "rosparam set use_sim_time true"-->
+  <!-- <param name="use_sim_time" value="true"/> -->
+  <!-- Resto das defenições -->
   <arg name = "record" default = "false"/>
   <param name = "includeUnav" value="true" type="bool"/>
   <param name = "IncludeScans" value="111111" type="string"/>

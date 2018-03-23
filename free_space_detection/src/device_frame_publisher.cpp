@@ -275,7 +275,7 @@ int main(int argc, char **argv)
   tf::StampedTransform transform_novo;
   tf::TransformListener listener_novo;
 
-  ros::Rate loop_rate(50);
+  ros::Rate loop_rate(20);
   while (ros::ok())
   {
     try
