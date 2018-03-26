@@ -29,47 +29,48 @@ using namespace std;
 
 #include <sstream>
 
-void printData(const std_msgs::Float32MultiArray::ConstPtr& msg)
+class Comunication
 {
-  // float dstride0 = msg->layout.dim[0].stride;
-  // float dstride1 = msg->layout.dim[1].stride;
-  // float h = msg->layout.dim[0].size;
-  // float w = msg->layout.dim[1].size;
-  // ROS_INFO("Pitch =  %f", msg->data[0 + dstride1 * 0]);
-  // ROS_INFO("Roll = %f", msg->data[0 + dstride1 * 1]);
+public:
+  Comunication()
+  {
+    sub_ = nh_.subscribe("DadosInclin", 100, &Comunication::printData, this);
+  }
 
-  // Receber e converter para radianos
-  float pitch = msg->data[0] * 3.1415 / 180;
-  float roll = msg->data[1] * 3.1415 / 180;
-  // float z_mean = msg->data[2];
+  void printData(const std_msgs::Float32MultiArray::ConstPtr& msg)
+  {
+    // Criar a transformação entre chassis e estrada
+    static tf::TransformBroadcaster br;
+    tf::Transform transform;
 
-  // ROS_INFO("Pitch = %f", pitch);
-  // ROS_INFO("Roll = %f", roll);
+    // Receber e converter para radianos
+    float pitch = msg->data[0] * 3.1415 / 180;
+    float roll = msg->data[1] * 3.1415 / 180;
+    // float z_mean = msg->data[2];
+    pitch = -3.1415 / 10;
+    // aqui depois colocar zmean
+    transform.setOrigin(tf::Vector3(0, 0, 0.24));
+    transform.setRotation(tf::createQuaternionFromRPY(roll, pitch, 0));
 
-  // Criar a transformação entre chassis e estrada
-  static tf::TransformBroadcaster br;
-  tf::Transform transform;
+    // publicar a tranformada entre o chassis do carro e a estrada
+    br.sendTransform(tf::StampedTransform(transform, Time::now(), "/ground", "/car_center"));
+  }
 
-  // aqui depois colocar zmean
-  transform.setOrigin(tf::Vector3(0, 0, 0.24));
-  // roll = -3.1415 / 10;
-  // float pitch = -3.1415 / 10;
+private:
+  ros::NodeHandle nh_;
+  ros::Subscriber sub_;
+};
 
-  // float roll = 0;
-  // pitch = 0;
-  transform.setRotation(tf::createQuaternionFromRPY(roll, pitch, 0));
-
-  // publicar a tranformada entre o chassis do carro e a estrada
-  br.sendTransform(tf::StampedTransform(transform, Time::now(), "/ground", "/car_center"));
-}
+// void Comunication::loop_function()
+// {
+//   pub_.publish(msg);
+//   loop_rate.sleep();
+// }
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "Rec_inclin");
-
-  ros::NodeHandle n;
-
-  ros::Subscriber sub = n.subscribe("DadosInclin", 1000, printData);
+  ros::init(argc, argv, "Comunication");
+  Comunication comunic;
 
   ros::spin();
 

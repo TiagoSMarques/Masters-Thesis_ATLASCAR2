@@ -9,7 +9,7 @@ int main(int argc, char** argv)
   tf::TransformBroadcaster br;
   tf::Transform transform;
 
-  ros::Rate rate(20);
+  ros::Rate rate(50);
   while (node.ok())
   {
     // distância entre eixos do carro: 2550

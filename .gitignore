@@ -1,13 +1,13 @@
 #Folders
 .vscode/
-navigation_msgs/
-colormap/
-driver_common-indigo-devel/
-laser/
-lidar_segmentation/
-pointgrey_camera_driver-master/
-sick_ldmrs/
-velodyne-master/
+.navigation_msgs/
+.colormap/
+.driver_common-indigo-devel/
+.laser/
+.lidar_segmentation/
+.pointgrey_camera_driver-master/
+.sick_ldmrs/
+.velodyne-master/
 
 # Prerequisites
 *.d
