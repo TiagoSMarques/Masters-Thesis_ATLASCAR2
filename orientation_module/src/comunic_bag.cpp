@@ -22,10 +22,6 @@ public:
     pub_.publish(output);
   }
 
-  void pubscan(const sensor_msgs::LaserScan::ConstPtr& msg)
-  {
-  }
-
 private:
   ros::NodeHandle n_;
   ros::Publisher pub_;

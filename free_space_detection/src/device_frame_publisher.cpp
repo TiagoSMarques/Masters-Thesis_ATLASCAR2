@@ -244,7 +244,9 @@ void readCalibrationFiles(string filesPath, vector<tf::Transform> &deviceFrames,
 void drawMarker(ros::Publisher chatter_pub, tf::StampedTransform transform_marker)
 {
   tf::Vector3 origin;
+  tf::Quaternion orient;
   origin = transform_marker.getOrigin();
+  orient = transform_marker.getRotation();
 
   // Inicialização
   visualization_msgs::Marker marker;
@@ -259,11 +261,11 @@ void drawMarker(ros::Publisher chatter_pub, tf::StampedTransform transform_marke
   marker.pose.position.x = origin.x();
   marker.pose.position.y = origin.y();
   marker.pose.position.z = origin.z();
-  marker.pose.orientation.y = 0.0;
-  marker.pose.orientation.x = 0.0;
-  marker.pose.orientation.z = 0.0;
-  marker.pose.orientation.w = 1.0;
-  marker.scale.x = 10;
+  marker.pose.orientation.y = orient.y();
+  marker.pose.orientation.x = orient.x();
+  marker.pose.orientation.z = orient.z();
+  marker.pose.orientation.w = orient.w();
+  marker.scale.x = 15;
   marker.scale.y = 0.1;
   marker.scale.z = 0.1;
   marker.color.a = 1;  // Don't forget to set the alpha!
@@ -320,11 +322,11 @@ int main(int argc, char **argv)
     try
     {
       // transformação entre o referencial mundo e o centro do carro
-      listener_novo.lookupTransform("map", "car_center", ros::Time(0), transform_novo);
-      transform_acerto = transform_novo;
+      listener_novo.lookupTransform("car_center", "map", ros::Time(0), transform_novo);
+      // transform_acerto = transform_novo;
 
       // Vetor entre a origem do mundo e a origem do ref do centro do carro com a mesma rotação
-      transform_final.setOrigin(-transform_acerto.getOrigin());
+      transform_final.setOrigin(transform_novo.getOrigin());
       transform_final.setRotation(tf::Quaternion(0, 0, 0, 1));
 
       // Criar um referencial novo que irá servir como referencial base de todos os sensores
@@ -345,14 +347,14 @@ int main(int argc, char **argv)
     {
       tf::Transform T = deviceFrames[i];
       string name = deviceNames[i];
-      if (name == "velodyne")
-      {
-        br.sendTransform(tf::StampedTransform(T, ros::Time::now(), name, "map"));
-      }
-      else
-      {
-        br.sendTransform(tf::StampedTransform(T, ros::Time::now(), ref_sensor, name));
-      }
+      // if (name == "velodyne")
+      // {
+      //   br.sendTransform(tf::StampedTransform(T, ros::Time::now(), name, "map"));
+      // }
+      // else
+      // {
+      br.sendTransform(tf::StampedTransform(T, ros::Time::now(), ref_sensor, name));
+      // }
     }
 
     try
@@ -366,6 +368,7 @@ int main(int argc, char **argv)
       ros::Duration(1.0).sleep();
       continue;
     }
+
     drawMarker(chatter_pub, transform_marker);
     ros::spinOnce();
     loop_rate.sleep();

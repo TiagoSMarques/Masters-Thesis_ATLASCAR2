@@ -48,14 +48,14 @@ public:
     // Receber e converter para radianos
     float pitch = msg->data[0] * 3.1415 / 180;
     float roll = msg->data[1] * 3.1415 / 180;
-    // float z_mean = msg->data[2];
+    float z_mean = msg->data[2] / 1000;
     // pitch = -3.1415 / 10;
     // aqui depois colocar zmean
-    transform.setOrigin(tf::Vector3(0, 0, 0.24));
+    transform.setOrigin(tf::Vector3(0, 0, z_mean));
     transform.setRotation(tf::createQuaternionFromRPY(roll, pitch, 0));
 
     // publicar a tranformada entre o chassis do carro e a estrada
-    br.sendTransform(tf::StampedTransform(transform, Time::now(), "/ground", "/car_center"));
+    br.sendTransform(tf::StampedTransform(transform, Time::now(), "ground", "car_center"));
   }
 
 private:
