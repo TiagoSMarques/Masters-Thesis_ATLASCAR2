@@ -18,8 +18,6 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
 
-#define DEFAULT_TIME 0.03
-
 using namespace ros;
 
 using namespace std;
@@ -34,8 +32,12 @@ class Comunication
 public:
   Comunication()
   {
-    sub_ = nh_.subscribe("DadosInclin", 100, &Comunication::printData, this);
+    sub = nh.subscribe("DadosInclin", 100, &Comunication::printData, this);
   }
+
+  // void loop_function()
+  // {
+  // }
 
   void printData(const std_msgs::Float32MultiArray::ConstPtr& msg)
   {
@@ -47,7 +49,7 @@ public:
     float pitch = msg->data[0] * 3.1415 / 180;
     float roll = msg->data[1] * 3.1415 / 180;
     // float z_mean = msg->data[2];
-    pitch = -3.1415 / 10;
+    // pitch = -3.1415 / 10;
     // aqui depois colocar zmean
     transform.setOrigin(tf::Vector3(0, 0, 0.24));
     transform.setRotation(tf::createQuaternionFromRPY(roll, pitch, 0));
@@ -57,22 +59,22 @@ public:
   }
 
 private:
-  ros::NodeHandle nh_;
-  ros::Subscriber sub_;
+  ros::NodeHandle nh;
+  ros::Subscriber sub;
+  ros::Publisher vis_pub;
 };
-
-// void Comunication::loop_function()
-// {
-//   pub_.publish(msg);
-//   loop_rate.sleep();
-// }
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "Comunication");
+  // ros::NodeHandle nh;
   Comunication comunic;
 
-  ros::spin();
+  while (ros::ok())
+  {
+    // comunic.loop_function();
+    ros::spinOnce();
+  }
 
   return 0;
 }

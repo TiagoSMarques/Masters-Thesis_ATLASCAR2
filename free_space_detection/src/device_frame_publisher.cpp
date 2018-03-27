@@ -241,6 +241,40 @@ void readCalibrationFiles(string filesPath, vector<tf::Transform> &deviceFrames,
    @param argv
    @return int
  */
+void drawMarker(ros::Publisher chatter_pub, tf::StampedTransform transform_marker)
+{
+  tf::Vector3 origin;
+  origin = transform_marker.getOrigin();
+
+  // Inicialização
+  visualization_msgs::Marker marker;
+  marker.header.frame_id = "moving_axis";
+  marker.header.stamp = ros::Time::now();
+  marker.ns = "my_namespace";
+  marker.id = 0;
+  marker.type = visualization_msgs::Marker::ARROW;
+
+  // Marcador
+  // marker.action = visualization_msgs::Marker::ADD;
+  marker.pose.position.x = origin.x();
+  marker.pose.position.y = origin.y();
+  marker.pose.position.z = origin.z();
+  marker.pose.orientation.y = 0.0;
+  marker.pose.orientation.x = 0.0;
+  marker.pose.orientation.z = 0.0;
+  marker.pose.orientation.w = 1.0;
+  marker.scale.x = 10;
+  marker.scale.y = 0.1;
+  marker.scale.z = 0.1;
+  marker.color.a = 1;  // Don't forget to set the alpha!
+  marker.color.r = 0.0;
+  marker.color.g = 1.0;
+  marker.color.b = 0.0;
+
+  // ROS_INFO("Here!!!!!!!!!!!!!1");
+  chatter_pub.publish(marker);
+}
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "device_frame_publisher");
@@ -274,6 +308,11 @@ int main(int argc, char **argv)
   tf::Transform transform_final;
   tf::StampedTransform transform_novo;
   tf::TransformListener listener_novo;
+
+  tf::TransformListener listener_marker;
+  tf::StampedTransform transform_marker;
+  // ros::Publisher chatter_pub = nh.advertise<std_msgs::String>("chatter", 1000);
+  ros::Publisher chatter_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 0);
 
   ros::Rate loop_rate(50);
   while (ros::ok())
@@ -316,6 +355,18 @@ int main(int argc, char **argv)
       }
     }
 
+    try
+    {
+      // Desenhar o a linha marcador
+      listener_marker.lookupTransform("map", "ldmrs3", ros::Time(0), transform_marker);
+    }
+    catch (tf::TransformException &ex)
+    {
+      ROS_ERROR("%s", ex.what());
+      ros::Duration(1.0).sleep();
+      continue;
+    }
+    drawMarker(chatter_pub, transform_marker);
     ros::spinOnce();
     loop_rate.sleep();
   }

@@ -34,40 +34,40 @@
 #ifndef _FRAME_PUBLISHER_H_
 #define _FRAME_PUBLISHER_H_
 
+#include <geometry_msgs/Polygon.h>
+#include <geometry_msgs/PolygonStamped.h>
+#include <laser_geometry/laser_geometry.h>
 #include <ros/ros.h>
-#include <tf/transform_listener.h>
-#include <std_msgs/String.h>
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <vector>
+#include <std_msgs/String.h>
 #include <stdio.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <ctime>
 #include <sys/stat.h>
-#include <geometry_msgs/PolygonStamped.h>
-#include <geometry_msgs/Polygon.h>
-#include <laser_geometry/laser_geometry.h>
+#include <tf/transform_listener.h>
+#include <visualization_msgs/Marker.h>
+#include <ctime>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 /*---PointCould Includes---*/
-#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/io/pcd_io.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <pcl/io/pcd_io.h>
 #include <pcl/registration/transformation_estimation_svd.h>
+#include <pcl_conversions/pcl_conversions.h>
 /*---LAR TK4 Includes---*/
+#include <colormap/colormap.h>
 #include "lidar_segmentation/clustering.h"
 #include "lidar_segmentation/lidar_segmentation.h"
 #include "lidar_segmentation/visualization_rviz.h"
-#include <colormap/colormap.h>
 /*---Boost filesystem to get parent directory---*/
-#include "boost/filesystem.hpp"
 #include <boost/bind.hpp>
+#include "boost/filesystem.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include "boost/progress.hpp"
-
 
 /*---DEFINES---*/
 typedef geometry_msgs::PolygonStamped polygonS;
@@ -79,14 +79,12 @@ typedef sensor_msgs::PointCloud2 PCL;
 using namespace ros;
 using namespace std;
 
-
 /*---Prototipos---*/
 int getFilesInDir(const string filesPath, vector<string> &outfiles, vector<string> &filesName);
 Eigen::Matrix4f getTransformFromFile(string filePath);
 tf::Transform getTfTransform(Eigen::MatrixX4f trans);
 tf::Transform getTf(double x, double y, double z, double r, double p, double yy);
 void readCalibrationFiles(string filesPath, vector<tf::Transform> &deviceFrames, vector<string> &deviceNames);
-
-
+void drawMarker(ros::Publisher chatter_pub, tf::StampedTransform transform_marker);
 
 #endif
