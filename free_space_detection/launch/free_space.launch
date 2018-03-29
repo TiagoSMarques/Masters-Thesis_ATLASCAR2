@@ -18,6 +18,10 @@
   <node pkg="orientation_module" type="orientation_module_node" name="comunic" required="true" output="screen"/>
   <!-- Launch the node   -->
   <node pkg="road_reconstruction" type="road_reconstruction_node" name="road_reconstruction" required="true" output="screen"/>
+  <!-- Point cloud assembler -->
+  <!-- <node type="point_cloud_assembler" pkg="laser_assembler" name="my_assembler"><remap from="cloud" to="cloud"/><param name="max_clouds" type="int" value="400" /><param name="fixed_frame" type="string" value="map" /></node> -->
+  <node pkg="road_reconstruction" type="assem" name="assem" required="true" output="screen"/>
+  <!-- <remap from="my_cloud_in" to="cloud"/> -->
   <!-- Conversão em dados de gps -->
   <!-- <node name="gps_conv" pkg="gps_common" type="utm_odometry_node"><remap from="odom" to="vo"/><remap from="fix" to="/gps/fix" /><param name="rot_covariance" value="99999" /><param name="frame_id" value="base_footprint" /></node> -->
   <!-- Launch the node   -->

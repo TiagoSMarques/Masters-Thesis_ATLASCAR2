@@ -68,8 +68,8 @@ GroundPosition::GroundPosition() : loop_rate(50)
 
 void GroundPosition::loop_function()
 {
-  transform.setOrigin(tf::Vector3(-(0.5 + 2.550 / 2), 0, -0.28));
-  // transform.setOrigin(tf::Vector3(dist_tot, 0, -0.28));
+  // transform.setOrigin(tf::Vector3(-(0.5 + 2.550 / 2), 0, -0.28));
+  transform.setOrigin(tf::Vector3(dist_tot / 10, 0, -0.28));
   transform.setRotation(tf::Quaternion(0, 0, 0, 1));
   br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "ground"));
   loop_rate.sleep();

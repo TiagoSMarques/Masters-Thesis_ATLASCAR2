@@ -261,10 +261,10 @@ void drawMarker(ros::Publisher chatter_pub, tf::StampedTransform transform_marke
   marker.pose.position.x = origin.x();
   marker.pose.position.y = origin.y();
   marker.pose.position.z = origin.z();
-  marker.pose.orientation.y = orient.y();
-  marker.pose.orientation.x = orient.x();
-  marker.pose.orientation.z = orient.z();
-  marker.pose.orientation.w = orient.w();
+  marker.pose.orientation.y = 0;  // orient.y();
+  marker.pose.orientation.x = 1;  // orient.x();
+  marker.pose.orientation.z = 0;  // orient.z();
+  marker.pose.orientation.w = 1;  // orient.w();
   marker.scale.x = 15;
   marker.scale.y = 0.1;
   marker.scale.z = 0.1;
@@ -326,9 +326,13 @@ int main(int argc, char **argv)
       // transform_acerto = transform_novo;
 
       // Vetor entre a origem do mundo e a origem do ref do centro do carro com a mesma rotação
-      transform_final.setOrigin(transform_novo.getOrigin());
+      // transform_final.setOrigin(transform_novo.getOrigin());
+      transform_final.setOrigin(tf::Vector3(1.772, 0, -0.168));
+
       transform_final.setRotation(tf::Quaternion(0, 0, 0, 1));
 
+      // ROS_INFO("Moving axis position in car_center [%f, %f, %f]", transform_novo.getOrigin().x(),
+      //          transform_novo.getOrigin().y(), transform_novo.getOrigin().z());
       // Criar um referencial novo que irá servir como referencial base de todos os sensores
       br.sendTransform(tf::StampedTransform(transform_final, ros::Time::now(), "car_center", "moving_axis"));
     }
@@ -359,8 +363,8 @@ int main(int argc, char **argv)
 
     try
     {
-      // Desenhar o a linha marcador
-      listener_marker.lookupTransform("map", "ldmrs3", ros::Time(0), transform_marker);
+      // Trasformação que dá o centro do referencial ldmrs3 (TA MAL)
+      listener_marker.lookupTransform("lms151_E", "ldmrs3", ros::Time(0), transform_marker);
     }
     catch (tf::TransformException &ex)
     {
@@ -368,8 +372,8 @@ int main(int argc, char **argv)
       ros::Duration(1.0).sleep();
       continue;
     }
-
-    drawMarker(chatter_pub, transform_marker);
+    // Desenhar a seta de marcador
+    // drawMarker(chatter_pub, transform_marker);
     ros::spinOnce();
     loop_rate.sleep();
   }

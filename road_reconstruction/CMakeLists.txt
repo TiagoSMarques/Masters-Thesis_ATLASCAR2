@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(cmake_modules)
 find_package(Eigen REQUIRED)
+find_package( PCL REQUIRED )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -60,11 +61,13 @@ find_package(Eigen REQUIRED)
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
+#  add_service_files(
+#    FILES
+#    AssembleScans.srv
+#    AssembleScans2.srv
 #   Service1.srv
 #   Service2.srv
-# )
+#  )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -124,9 +127,11 @@ catkin_package(
 include_directories(
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
   include
 )
 
+add_definitions(${PCL_DEFINITIONS})
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/road_reconstruction.cpp
@@ -141,7 +146,9 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/road_reconstruction.cpp)
-
+add_executable(assem src/assemble.cpp)
+target_link_libraries(assem ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+link_directories(${PCL_LIBRARY_DIRS})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -157,7 +164,6 @@ add_executable(${PROJECT_NAME}_node src/road_reconstruction.cpp)
    ${catkin_LIBRARIES}
    ${Eigen_LIBRARIES}
 )
-
 #############
 ## Install ##
 #############
