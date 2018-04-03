@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- -->
 <robot name="ATLCASCAR2">
-  <link name="map">
+  <link name="moving_axis">
     <visual>
       <origin rpy="1.57 0 1.57" xyz="-3.6 -0.93 -0.3"/>
       <geometry>

@@ -18,7 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 find_package(cmake_modules)
 find_package(Eigen REQUIRED)
-find_package( PCL REQUIRED )
+find_package(PCL REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -113,7 +113,7 @@ find_package( PCL REQUIRED )
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES road_reconstruction
+  #LIBRARIES road_reconstruction
   # CATKIN_DEPENDS roscpp rospy std_msgs
   DEPENDS Eigen
 )
@@ -127,11 +127,9 @@ catkin_package(
 include_directories(
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
-  ${PCL_INCLUDE_DIRS}
   include
 )
 
-add_definitions(${PCL_DEFINITIONS})
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/road_reconstruction.cpp
@@ -148,7 +146,14 @@ add_definitions(${PCL_DEFINITIONS})
 add_executable(${PROJECT_NAME}_node src/road_reconstruction.cpp)
 add_executable(assem src/assemble.cpp)
 target_link_libraries(assem ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+
+target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES})
+
 link_directories(${PCL_LIBRARY_DIRS})
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
