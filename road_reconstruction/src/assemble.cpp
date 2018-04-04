@@ -129,6 +129,7 @@
 #include <pcl/PCLPointCloud2.h>
 #include <pcl/conversions.h>
 #include <pcl/filters/conditional_removal.h>
+#include <pcl/filters/voxel_grid.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
@@ -229,13 +230,19 @@ void CloudAssembler::cleanCloud()
   condrem.setCondition(range_cond);
   condrem.setInputCloud(cloud_to_clean);
   condrem.setKeepOrganized(true);
-
   // apply filter
   condrem.filter(*cloud_filtered);
+
   // Depois passar aqui um voxel filter para diminuir a densidade dos pontos
+  VoxelGrid<pcl::PointXYZ> vg;
+  PointCloud<pcl::PointXYZ>::Ptr cloud_filteredVox(new PointCloud<pcl::PointXYZ>);
+
+  vg.setInputCloud(cloud_filtered);
+  vg.setLeafSize(0.08f, 0.08f, 0.08f);
+  vg.filter(*cloud_filteredVox);
   // converter para mensagem para ser publicada
 
-  clean_cloud_ = *cloud_filtered;
+  clean_cloud_ = *cloud_filteredVox;
   // pcl::toROSMsg(*cloud_filtered, clean_cloud_);
 }
 
