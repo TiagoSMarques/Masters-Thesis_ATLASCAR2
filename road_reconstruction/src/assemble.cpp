@@ -125,13 +125,17 @@
  *      Author: dimitri prosser
  */
 
+#include <laser_geometry/laser_geometry.h>
+#include <pcl/PCLPointCloud2.h>
 #include <pcl/conversions.h>
+#include <pcl/filters/conditional_removal.h>
+#include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <std_srvs/Empty.h>
-#include <tf/transform_listener.h>
 #include <tf/transform_listener.h>
 #include <Eigen/Core>
 #include <boost/algorithm/string.hpp>
@@ -159,12 +163,15 @@ private:
   tf::TransformListener tf_;
 
   PointCloud2 assembled_cloud_;
+  PointCloud2 clean_cloud_;
   int buffer_length_;
+  int dist;
   std::vector<sensor_msgs::PointCloud2> cloud_buffer_;
   bool assemblerPaused_;
 
   void addToBuffer(sensor_msgs::PointCloud2 cloud);
   void assembleCloud();
+  void cleanCloud();
   bool pauseSrv(std_srvs::Empty::Request& req, std_srvs::Empty::Response& resp);
 };
 
@@ -172,7 +179,7 @@ CloudAssembler::CloudAssembler()
 {
   ros::NodeHandle private_nh("~");
 
-  private_nh.param("buffer_length", buffer_length_, 800);
+  private_nh.param("buffer_length", buffer_length_, 400);
 
   output_pub_ = node_.advertise<sensor_msgs::PointCloud2>("/assembled_cloud", 100);
 
@@ -186,13 +193,60 @@ CloudAssembler::CloudAssembler()
   assemblerPaused_ = false;
 }
 
+void CloudAssembler::cleanCloud()
+{
+  tf::StampedTransform transformOdom;
+  tf::TransformListener listener;
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_to_clean(new pcl::PointCloud<pcl::PointXYZ>);
+  // pcl::fromROSMsg(assembled_cloud_, *cloud_to_clean);
+  *cloud_to_clean = assembled_cloud_;
+  try
+  {
+    listener.waitForTransform("map", "ground", ros::Time(0), ros::Duration(2.0));
+    listener.lookupTransform("map", "ground", ros::Time(0), transformOdom);
+  }
+  catch (tf::TransformException& ex)
+  {
+    ROS_ERROR("%s", ex.what());
+  }
+  // Localização da origem do ref ground
+  float Xo = transformOdom.getOrigin().x();
+  float Yo = transformOdom.getOrigin().y();
+  float Zo = transformOdom.getOrigin().z();
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::ConditionAnd<pcl::PointXYZ>::Ptr range_cond(new pcl::ConditionAnd<pcl::PointXYZ>());
+
+  // Condição para os limites da bounding box de representação da pointcloud
+  range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
+      new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::GT, Xo - 5)));
+  range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
+      new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::LT, Xo + 30)));
+
+  // build the filter
+  pcl::ConditionalRemoval<pcl::PointXYZ> condrem;
+  condrem.setCondition(range_cond);
+  condrem.setInputCloud(cloud_to_clean);
+  condrem.setKeepOrganized(true);
+
+  // apply filter
+  condrem.filter(*cloud_filtered);
+  // Depois passar aqui um voxel filter para diminuir a densidade dos pontos
+  // converter para mensagem para ser publicada
+
+  clean_cloud_ = *cloud_filtered;
+  // pcl::toROSMsg(*cloud_filtered, clean_cloud_);
+}
+
 void CloudAssembler::cloudCallback(const sensor_msgs::PointCloud2& cloud)
 {
   addToBuffer(cloud);
   assembleCloud();
+  cleanCloud();
 
   sensor_msgs::PointCloud2 cloud_msg;
-  pcl::toROSMsg(assembled_cloud_, cloud_msg);
+  pcl::toROSMsg(clean_cloud_, cloud_msg);
 
   cloud_msg.header.frame_id = cloud.header.frame_id;
   cloud_msg.header.stamp = ros::Time::now();

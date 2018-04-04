@@ -39,9 +39,9 @@ public:
   GroundPosition();
   void loop_function();
 
-  void getVel(const gps_common::GPSFixConstPtr& msg)
+  void getPose(const gps_common::GPSFixConstPtr& msg)
   {
-    // Velocidade em m/s
+    // velocidade em m/s
     spp = msg->speed;
     // Assumindo que vem 1 mensagem por 1/10 seg (1/9.3 aprox)
     // A distância percorrida é:
@@ -49,6 +49,8 @@ public:
     dist_tot = dist_tot + dist;
 
     // ROS_INFO("Vrumm: %f, dist: %f", spp, dist_tot);
+    // Sacar o azimuth daquilo para saber a orientação em realção ao ref original (map)
+    yaw = 0;
   }
 
 private:
@@ -57,20 +59,21 @@ private:
   ros::Subscriber sub;
   tf::TransformBroadcaster br;
   tf::Transform transform;
-  float spp;
-  float dist;
+  float spp, dist, yaw;
 };
 
 GroundPosition::GroundPosition() : loop_rate(50)
 {
-  sub = n.subscribe("/gps", 1, &GroundPosition::getVel, this);
+  sub = n.subscribe("/gps", 1, &GroundPosition::getPose, this);
 }
 
 void GroundPosition::loop_function()
 {
   // transform.setOrigin(tf::Vector3(-(0.5 + 2.550 / 2), 0, -0.28));
   transform.setOrigin(tf::Vector3(dist_tot / 10, 0, -0.28));
-  transform.setRotation(tf::Quaternion(0, 0, 0, 1));
+
+  // transform.setRotation(tf::Quaternion(0, 0, 0, 1));
+  transform.setRotation(tf::createQuaternionFromRPY(0, 0, yaw));
   br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "ground"));
   loop_rate.sleep();
 }

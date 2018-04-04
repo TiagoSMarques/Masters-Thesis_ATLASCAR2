@@ -53,7 +53,7 @@ sensor_msgs::PointCloud2 My_Filter::remove_extra_points(sensor_msgs::PointCloud2
   {
     ROS_ERROR("%s", ex.what());
   }
-
+  // Localização da origem do ref ground
   float Xo = transformOdom.getOrigin().x();
   float Yo = transformOdom.getOrigin().y();
   float Zo = transformOdom.getOrigin().z();
@@ -61,24 +61,18 @@ sensor_msgs::PointCloud2 My_Filter::remove_extra_points(sensor_msgs::PointCloud2
   // ROS_INFO("X pose %f", transformOdom.getOrigin().x());
   // ROS_INFO("Y pose %f", transformOdom.getOrigin().y());
 
-  // Depois tentar passar por referencia para diminuir o tempo de processamento
+  // Variavel a ser retornada
   sensor_msgs::PointCloud2 cloud2;
-
   // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_to_clean(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
   pcl::ConditionAnd<pcl::PointXYZ>::Ptr range_cond(new pcl::ConditionAnd<pcl::PointXYZ>());
 
-  // build the condition
+  // Condição para os limites da bounding box de representação da pointcloud
 
   range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-      new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::GT, Xo - 10)));
+      new pcl::FieldComparison<pcl::PointXYZ>("y", pcl::ComparisonOps::GT, Yo - 6)));
   range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-      new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::LT, Xo + 10)));
-
-  range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-      new pcl::FieldComparison<pcl::PointXYZ>("y", pcl::ComparisonOps::GT, Yo - 5)));
-  range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-      new pcl::FieldComparison<pcl::PointXYZ>("y", pcl::ComparisonOps::LT, Yo + 5)));
+      new pcl::FieldComparison<pcl::PointXYZ>("y", pcl::ComparisonOps::LT, Yo + 6)));
 
   // build the filter
   pcl::ConditionalRemoval<pcl::PointXYZ> condrem;
@@ -88,26 +82,9 @@ sensor_msgs::PointCloud2 My_Filter::remove_extra_points(sensor_msgs::PointCloud2
 
   // apply filter
   condrem.filter(*cloud_filtered);
+  // Depois passar aqui um voxel filter para diminuir a densidade dos pontos
+  // converter para mensagem para ser publicada
 
-  // float dist_x, dist_y, dist_z, dist_norm;
-  // // Converter para mensagem do tipo
-  // pcl::fromROSMsg(cloud, *cloud_to_clean);
-  // long int points = cloud_to_clean->points.size();
-  // for (int i = points - 1; i > 0; --i)
-  // {
-  //   dist_x = cloud_to_clean->points[i].x - Xo;
-  //   dist_y = cloud_to_clean->points[i].y - Yo;
-  //   dist_z = cloud_to_clean->points[i].z - Zo;
-
-  //   dist_norm = sqrt(dist_x * dist_x + dist_y * dist_y + dist_z * dist_z);
-
-  //   if (dist_norm > dist)  // verify distance
-  //   {
-  //     cloud_to_clean->erase(cloud_to_clean->points.begin() + i);
-  //   }
-  // }
-
-  // ROS_INFO("Tamanho da núvem: %ld", points);
   pcl::toROSMsg(*cloud_filtered, cloud2);
 
   return cloud2;
