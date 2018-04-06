@@ -70,9 +70,9 @@ sensor_msgs::PointCloud2 My_Filter::remove_extra_points(sensor_msgs::PointCloud2
   // Condição para os limites da bounding box de representação da pointcloud
 
   range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-      new pcl::FieldComparison<pcl::PointXYZ>("y", pcl::ComparisonOps::GT, Yo - 6)));
+      new pcl::FieldComparison<pcl::PointXYZ>("y", pcl::ComparisonOps::GT, Yo - 20)));
   range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-      new pcl::FieldComparison<pcl::PointXYZ>("y", pcl::ComparisonOps::LT, Yo + 6)));
+      new pcl::FieldComparison<pcl::PointXYZ>("y", pcl::ComparisonOps::LT, Yo + 20)));
 
   // build the filter
   pcl::ConditionalRemoval<pcl::PointXYZ> condrem;

@@ -319,29 +319,29 @@ int main(int argc, char **argv)
   ros::Rate loop_rate(50);
   while (ros::ok())
   {
-    try
-    {
-      // transformação entre o referencial mundo e o centro do carro
-      listener_novo.lookupTransform("car_center", "map", ros::Time(0), transform_novo);
-      // transform_acerto = transform_novo;
+    // try
+    // {
+    // transformação entre o referencial mundo e o centro do carro
+    // listener_novo.lookupTransform("car_center", "ground", ros::Time(0), transform_novo);
+    // transform_acerto = transform_novo;
 
-      // Vetor entre a origem do mundo e a origem do ref do centro do carro com a mesma rotação
-      // transform_final.setOrigin(transform_novo.getOrigin());
-      transform_final.setOrigin(tf::Vector3(1.772, 0, -0.168));
+    // Vetor entre a origem do mundo e a origem do ref do centro do carro com a mesma rotação
+    // transform_final.setOrigin(transform_novo.getOrigin());
+    transform_final.setOrigin(tf::Vector3(1.772, 0, -0.168));
 
-      transform_final.setRotation(tf::Quaternion(0, 0, 0, 1));
+    transform_final.setRotation(tf::Quaternion(0, 0, 0, 1));
 
-      // ROS_INFO("Moving axis position in car_center [%f, %f, %f]", transform_novo.getOrigin().x(),
-      //          transform_novo.getOrigin().y(), transform_novo.getOrigin().z());
-      // Criar um referencial novo que irá servir como referencial base de todos os sensores
-      br.sendTransform(tf::StampedTransform(transform_final, ros::Time::now(), "car_center", "moving_axis"));
-    }
-    catch (tf::TransformException &ex)
-    {
-      ROS_ERROR("%s", ex.what());
-      ros::Duration(1.0).sleep();
-      continue;
-    }
+    // ROS_INFO("Moving axis position in car_center [%f, %f, %f]", transform_novo.getOrigin().x(),
+    //          transform_novo.getOrigin().y(), transform_novo.getOrigin().z());
+    // Criar um referencial novo que irá servir como referencial base de todos os sensores
+    br.sendTransform(tf::StampedTransform(transform_final, ros::Time::now(), "car_center", "moving_axis"));
+    // }
+    // catch (tf::TransformException &ex)
+    // {
+    //   ROS_ERROR("%s", ex.what());
+    //   ros::Duration(1.0).sleep();
+    //   continue;
+    // }
 
     // Associar ao sensor referência o referencial base
     br.sendTransform(tf::StampedTransform(LD_tf.inverse(), ros::Time::now(), "moving_axis", ref_sensor));

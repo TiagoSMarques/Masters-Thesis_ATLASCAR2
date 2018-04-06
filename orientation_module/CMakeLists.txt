@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   tf
+  swri_math_util
 )
 
 ## System dependencies are found with CMake's conventions
@@ -108,6 +109,7 @@ catkin_package(
 #  LIBRARIES orientation_module
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
+# swri_math_util
 )
 
 ###########

@@ -35,10 +35,6 @@ public:
     sub = nh.subscribe("DadosInclin", 100, &Comunication::printData, this);
   }
 
-  // void loop_function()
-  // {
-  // }
-
   void printData(const std_msgs::Float32MultiArray::ConstPtr& msg)
   {
     // Criar a transformação entre chassis e estrada

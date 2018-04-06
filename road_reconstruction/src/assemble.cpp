@@ -221,9 +221,9 @@ void CloudAssembler::cleanCloud()
 
   // Condição para os limites da bounding box de representação da pointcloud
   range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-      new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::GT, Xo - 5)));
+      new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::GT, Xo - 20)));
   range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-      new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::LT, Xo + 30)));
+      new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::LT, Xo + 20)));
 
   // build the filter
   pcl::ConditionalRemoval<pcl::PointXYZ> condrem;
@@ -238,7 +238,7 @@ void CloudAssembler::cleanCloud()
   PointCloud<pcl::PointXYZ>::Ptr cloud_filteredVox(new PointCloud<pcl::PointXYZ>);
 
   vg.setInputCloud(cloud_filtered);
-  vg.setLeafSize(0.08f, 0.08f, 0.08f);
+  vg.setLeafSize(0.5f, 0.5f, 0.5f);
   vg.filter(*cloud_filteredVox);
   // converter para mensagem para ser publicada
 
