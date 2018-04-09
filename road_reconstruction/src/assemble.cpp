@@ -32,8 +32,8 @@
 // *  POSSIBILITY OF SUCH DAMAGE.
 // *********************************************************************/
 
-// #include <ros/ros.h>
 // #include <cstdio>
+// #include <ros/ros.h>
 
 // // Services
 // #include "laser_assembler/AssembleScans.h"
@@ -48,19 +48,22 @@
 //  */
 // namespace laser_assembler
 // {
+
 // class PeriodicSnapshotter
 // {
+
 // public:
+
 //   PeriodicSnapshotter()
 //   {
 //     // Create a publisher for the clouds that we assemble
-//     pub_ = n_.advertise<sensor_msgs::PointCloud>("assembled_cloud", 1);
+//     pub_ = n_.advertise<sensor_msgs::PointCloud> ("assembled_cloud", 1);
 
 //     // Create the service client for calling the assembler
 //     client_ = n_.serviceClient<AssembleScans>("assemble_scans");
 
 //     // Start the timer that will trigger the processing loop (timerCallback)
-//     timer_ = n_.createTimer(ros::Duration(5, 0), &PeriodicSnapshotter::timerCallback, this);
+//     timer_ = n_.createTimer(ros::Duration(5,0), &PeriodicSnapshotter::timerCallback, this);
 
 //     // Need to track if we've called the timerCallback at least once
 //     first_time_ = true;
@@ -68,6 +71,7 @@
 
 //   void timerCallback(const ros::TimerEvent& e)
 //   {
+
 //     // We don't want to build a cloud the first callback, since we we
 //     //   don't have a start and end time yet
 //     if (first_time_)
@@ -79,17 +83,17 @@
 //     // Populate our service request based on our timer callback times
 //     AssembleScans srv;
 //     srv.request.begin = e.last_real;
-//     srv.request.end = e.current_real;
+//     srv.request.end   = e.current_real;
 
 //     // Make the service call
 //     if (client_.call(srv))
 //     {
-//       ROS_INFO("Published Cloud with %u points", (uint32_t)(srv.response.cloud.points.size()));
+//       ROS_INFO("Published Cloud with %u points", (uint32_t)(srv.response.cloud.points.size())) ;
 //       pub_.publish(srv.response.cloud);
 //     }
 //     else
 //     {
-//       ROS_ERROR("Error making service call\n");
+//       ROS_ERROR("Error making service call\n") ;
 //     }
 //   }
 
@@ -99,12 +103,13 @@
 //   ros::ServiceClient client_;
 //   ros::Timer timer_;
 //   bool first_time_;
-// };
+// } ;
+
 // }
 
-// using namespace laser_assembler;
+// using namespace laser_assembler ;
 
-// int main(int argc, char** argv)
+// int main(int argc, char **argv)
 // {
 //   ros::init(argc, argv, "periodic_snapshotter");
 //   ros::NodeHandle n;
@@ -167,13 +172,13 @@ private:
   PointCloud2 clean_cloud_;
   int buffer_length_;
   int dist;
-  std::vector<sensor_msgs::PointCloud2> cloud_buffer_;
+  std::deque<sensor_msgs::PointCloud2> cloud_buffer_;
   bool assemblerPaused_;
 
   void addToBuffer(sensor_msgs::PointCloud2 cloud);
   void assembleCloud();
   void cleanCloud();
-  bool pauseSrv(std_srvs::Empty::Request& req, std_srvs::Empty::Response& resp);
+  // bool pauseSrv(std_srvs::Empty::Request& req, std_srvs::Empty::Response& resp);
 };
 
 CloudAssembler::CloudAssembler()
@@ -184,14 +189,84 @@ CloudAssembler::CloudAssembler()
 
   output_pub_ = node_.advertise<sensor_msgs::PointCloud2>("/assembled_cloud", 100);
 
-  pause_srv_ = node_.advertiseService("/pause_assembler", &CloudAssembler::pauseSrv, this);
+  // pause_srv_ = node_.advertiseService("/pause_assembler", &CloudAssembler::pauseSrv, this);
 
   cloud_sub_ = node_.subscribe("/my_cloud_in", 100, &CloudAssembler::cloudCallback, this);
 
-  PointCloud2 clear;
-  assembled_cloud_ = clear;
+  // PointCloud2 clear;
+  // assembled_cloud_ = clear;
 
   assemblerPaused_ = false;
+}
+
+void CloudAssembler::cloudCallback(const sensor_msgs::PointCloud2& cloud)
+{
+  addToBuffer(cloud);
+  assembleCloud();
+  cleanCloud();
+
+  sensor_msgs::PointCloud2 cloud_msg;
+  pcl::toROSMsg(clean_cloud_, cloud_msg);
+
+  cloud_msg.header.frame_id = cloud.header.frame_id;
+  cloud_msg.header.stamp = ros::Time::now();
+
+  output_pub_.publish(cloud_msg);
+}
+
+void CloudAssembler::addToBuffer(sensor_msgs::PointCloud2 cloud)
+{
+  ROS_DEBUG("Adding cloud to buffer. Current buffer length is %ld", cloud_buffer_.size());
+
+  if (cloud_buffer_.size() >= (unsigned int)buffer_length_)
+  {
+    cloud_buffer_.erase(cloud_buffer_.begin());
+  }
+
+  cloud_buffer_.push_back(cloud);
+}
+
+void CloudAssembler::assembleCloud()
+{
+  ROS_DEBUG("Assembling.");
+
+  unsigned int i;
+
+  // if (assemblerPaused_)
+  // {
+  //   ROS_INFO("assemblerPaused_ is true");
+  // }
+  // if (!assemblerPaused_)
+  // {
+  //   ROS_DEBUG("assemblerPaused_ is false");
+  // }
+
+  std::string fixed_frame = cloud_buffer_[0].header.frame_id;
+
+  PointCloud2 new_cloud;
+  new_cloud.header.frame_id = fixed_frame;
+  // int last_elem = cloud_buffer_.size();
+  // pcl_conversions::toPCL(cloud_buffer_[last_elem].header.stamp, new_cloud.header.stamp);
+  pcl_conversions::toPCL(ros::Time::now(), new_cloud.header.stamp);
+  // new_cloud.header.stamp = ros::Time::now();
+
+  for (i = 0; i < cloud_buffer_.size(); i++)
+  {
+    PointCloud2 temp_cloud;
+    pcl::fromROSMsg(cloud_buffer_[i], temp_cloud);
+    temp_cloud.header.frame_id = fixed_frame;
+    new_cloud += temp_cloud;
+  }
+
+  // If it's paused, don't overwrite the stored cloud with a new one, just keep publishing the same cloud
+  // if (!assemblerPaused_)
+  // {
+  //   assembled_cloud_ = new_cloud;
+  // }
+  // else if (assemblerPaused_)
+  // {
+  //   ROS_DEBUG("The Assembler will continue to publish the same cloud.");
+  // }
 }
 
 void CloudAssembler::cleanCloud()
@@ -221,9 +296,9 @@ void CloudAssembler::cleanCloud()
 
   // Condição para os limites da bounding box de representação da pointcloud
   range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-      new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::GT, Xo - 20)));
+      new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::GT, Xo - 50)));
   range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-      new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::LT, Xo + 20)));
+      new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::LT, Xo + 50)));
 
   // build the filter
   pcl::ConditionalRemoval<pcl::PointXYZ> condrem;
@@ -234,74 +309,18 @@ void CloudAssembler::cleanCloud()
   condrem.filter(*cloud_filtered);
 
   // Depois passar aqui um voxel filter para diminuir a densidade dos pontos
-  VoxelGrid<pcl::PointXYZ> vg;
-  PointCloud<pcl::PointXYZ>::Ptr cloud_filteredVox(new PointCloud<pcl::PointXYZ>);
-
-  vg.setInputCloud(cloud_filtered);
-  vg.setLeafSize(0.5f, 0.5f, 0.5f);
-  vg.filter(*cloud_filteredVox);
+  // VoxelGrid<pcl::PointXYZ> vg;
+  // PointCloud<pcl::PointXYZ>::Ptr cloud_filteredVox(new PointCloud<pcl::PointXYZ>);
+  // vg.setInputCloud(cloud_filtered);
+  // vg.setLeafSize(0.9f, 0.9f, 0.9f);
+  // vg.filter(*cloud_filteredVox);
   // converter para mensagem para ser publicada
 
-  clean_cloud_ = *cloud_filteredVox;
+  clean_cloud_ = *cloud_filtered;
   // pcl::toROSMsg(*cloud_filtered, clean_cloud_);
 }
 
-void CloudAssembler::cloudCallback(const sensor_msgs::PointCloud2& cloud)
-{
-  addToBuffer(cloud);
-  assembleCloud();
-  cleanCloud();
-
-  sensor_msgs::PointCloud2 cloud_msg;
-  pcl::toROSMsg(clean_cloud_, cloud_msg);
-
-  cloud_msg.header.frame_id = cloud.header.frame_id;
-  cloud_msg.header.stamp = ros::Time::now();
-
-  output_pub_.publish(cloud_msg);
-}
-
-void CloudAssembler::assembleCloud()
-{
-  ROS_DEBUG("Assembling.");
-
-  unsigned int i;
-
-  if (assemblerPaused_)
-  {
-    ROS_INFO("assemblerPaused_ is true");
-  }
-  if (!assemblerPaused_)
-  {
-    ROS_DEBUG("assemblerPaused_ is false");
-  }
-
-  std::string fixed_frame = cloud_buffer_[0].header.frame_id;
-
-  PointCloud2 new_cloud;
-  new_cloud.header.frame_id = fixed_frame;
-  pcl_conversions::toPCL(ros::Time::now(), new_cloud.header.stamp);
-  //   new_cloud.header.stamp = ros::Time::now();
-
-  for (i = 0; i < cloud_buffer_.size(); i++)
-  {
-    PointCloud2 temp_cloud;
-    pcl::fromROSMsg(cloud_buffer_[i], temp_cloud);
-    temp_cloud.header.frame_id = fixed_frame;
-    new_cloud += temp_cloud;
-  }
-
-  // If it's paused, don't overwrite the stored cloud with a new one, just keep publishing the same cloud
-  if (!assemblerPaused_)
-  {
-    assembled_cloud_ = new_cloud;
-  }
-  else if (assemblerPaused_)
-  {
-    ROS_DEBUG("The Assembler will continue to publish the same cloud.");
-  }
-}
-
+/*
 bool CloudAssembler::pauseSrv(std_srvs::Empty::Request& req, std_srvs::Empty::Response& resp)
 {
   ROS_DEBUG("In service call: %s", assemblerPaused_ ? "true" : "false");
@@ -319,18 +338,7 @@ bool CloudAssembler::pauseSrv(std_srvs::Empty::Request& req, std_srvs::Empty::Re
 
   return true;
 }
-
-void CloudAssembler::addToBuffer(sensor_msgs::PointCloud2 cloud)
-{
-  ROS_DEBUG("Adding cloud to buffer. Current buffer length is %d", cloud_buffer_.size());
-
-  if (cloud_buffer_.size() >= (unsigned int)buffer_length_)
-  {
-    cloud_buffer_.erase(cloud_buffer_.begin());
-  }
-
-  cloud_buffer_.push_back(cloud);
-}
+*/
 
 };  // namespace
 

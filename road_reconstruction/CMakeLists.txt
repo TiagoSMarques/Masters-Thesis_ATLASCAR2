@@ -127,7 +127,8 @@ catkin_package(
 include_directories(
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
-  include
+  ${PCL_INCLUDE_DIRS}
+ # include
 )
 
 ## Declare a C++ library
@@ -143,11 +144,11 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(${PROJECT_NAME}_node src/road_reconstruction.cpp)
+add_executable(road_reconstruction src/road_reconstruction.cpp)
 add_executable(assem src/assemble.cpp)
-target_link_libraries(assem ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
-target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES})
+target_link_libraries(road_reconstruction ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(assem ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 link_directories(${PCL_LIBRARY_DIRS})
 include_directories(${PCL_INCLUDE_DIRS})
@@ -165,9 +166,13 @@ add_definitions(${PCL_DEFINITIONS})
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(${PROJECT_NAME}_node
+ target_link_libraries(road_reconstruction
    ${catkin_LIBRARIES}
    ${Eigen_LIBRARIES}
+   ${PCL_LIBRARIES}
+   ${PCL_COMMON_LIBRARIES}
+   ${PCL_IO_LIBRARIES}
+   -lpcl_filters
 )
 #############
 ## Install ##

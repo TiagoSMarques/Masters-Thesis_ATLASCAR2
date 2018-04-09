@@ -9,6 +9,7 @@
 // Ros includes
 #include <ros/ros.h>
 
+#include <sensor_msgs/Imu.h>
 #include <sensor_msgs/PointCloud2.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
@@ -33,6 +34,13 @@ public:
   Comunication()
   {
     sub = nh.subscribe("DadosInclin", 100, &Comunication::printData, this);
+    sub_imu = nh.subscribe("imu", 1, &Comunication::PubImuData, this);
+  }
+
+  void PubImuData(const sensor_msgs::ImuPtr& imu)
+  {
+    imu->header.frame_id = "World";
+    imu_pub.publish(imu);
   }
 
   void printData(const std_msgs::Float32MultiArray::ConstPtr& msg)
@@ -58,7 +66,9 @@ public:
 private:
   ros::NodeHandle nh;
   ros::Subscriber sub;
+  ros::Subscriber sub_imu;
   ros::Publisher vis_pub;
+  ros::Publisher imu_pub = nh.advertise<sensor_msgs::Imu>("imu_data", 1);
 };
 
 int main(int argc, char** argv)

@@ -16,11 +16,17 @@
   <node pkg="orientation_module" type="frame_tf_broadcaster" name="frame_tf_broadcaster" required="true" output="screen"/>
   <!-- Launch the node   -->
   <node pkg="orientation_module" type="orientation_module_node" name="comunic" required="true" output="screen"/>
-  <!-- Launch the node   -->
-  <node pkg="road_reconstruction" type="road_reconstruction_node" name="road_reconstruction" required="true" output="screen"/>
   <!-- Point cloud assembler -->
-  <!-- <node type="point_cloud_assembler" pkg="laser_assembler" name="my_assembler"><remap from="cloud" to="cloud"/><param name="max_clouds" type="int" value="400" /><param name="fixed_frame" type="string" value="map" /></node> -->
-  <node pkg="road_reconstruction" type="assem" name="assem" required="true" output="screen"/>
+  <node type="laser_scan_assembler" pkg="laser_assembler" name="my_assembler">
+    <remap from="scan" to="/ld_rms/scan3"/>
+    <param name="max_scans" type="int" value="200" />
+    <param name="fixed_frame" type="string" value="map" />
+  </node>
+  <!-- <node type="laser_scan_assembler" pkg="laser_assembler" name="my_assembler"><remap from="scan" to="/ld_rms/scan0"/><remap from="assemble_scans2" to="assembled_scans3"/><param name="max_scans" type="int" value="200" /><param name="fixed_frame" type="string" value="map" /></node> -->
+  <!-- Launch the node   -->
+  <node pkg="road_reconstruction" type="road_reconstruction" name="road_reconstruction" required="true" output="screen"/>
+  <!-- Launch the node   -->
+  <!-- <node pkg="road_reconstruction" type="assem" name="assem" required="true" output="screen"/> -->
   <!-- Conversão em dados de gps -->
   <node name="gps_conv" pkg="gps_common" type="utm_odometry_node">
     <remap from="odom" to="vo"/>
@@ -34,7 +40,7 @@
     <param name="freq" value="30.0"/>
     <param name="sensor_timeout" value="1.0"/>
     <param name="odom_used" value="false"/>
-    <param name="imu_used" value="true"/>
+    <param name="imu_used" value="false"/>
     <param name="vo_used" value="true"/>
     <param name="gps_used" value="false"/>
     <param name="debug" value="false"/>

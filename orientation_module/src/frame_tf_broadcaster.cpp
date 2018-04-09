@@ -5,6 +5,7 @@
 #include <novatel_gps_msgs/Inspva.h>
 #include <ros/ros.h>
 #include <std_msgs/String.h>
+
 #include <swri_math_util/constants.h>
 #include <swri_math_util/trig_util.h>
 #include <tf/transform_broadcaster.h>
@@ -16,7 +17,6 @@
 #include <std_msgs/Float32.h>
 #include <std_msgs/Float32MultiArray.h>
 
-float dist_tot = 0;
 class GroundPosition
 {
 public:
@@ -26,12 +26,11 @@ public:
 
 private:
   ros::NodeHandle n;
-  ros::Subscriber sub;
-  ros::Subscriber imu_sub_;
+  ros::Subscriber sub_odom;
+  ros::Subscriber sub_direction;
   tf::TransformBroadcaster br;
   tf::Transform transform;
-  // tf::TransformListener listener;
-  // tf::StampedTransform transform_ekf;
+
   geometry_msgs::Pose pose_in_world;
   ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("Path_marker", 10);
   double yaw;
@@ -44,8 +43,8 @@ private:
 
 GroundPosition::GroundPosition()
 {
-  sub = n.subscribe("odom", 1, &GroundPosition::getPose, this);
-  imu_sub_ = n.subscribe("inspva", 100, &GroundPosition::HandleImu, this);
+  sub_odom = n.subscribe("odom", 100, &GroundPosition::getPose, this);
+  sub_direction = n.subscribe("inspva", 100, &GroundPosition::HandleImu, this);
 }
 
 void GroundPosition::HandleImu(const novatel_gps_msgs::InspvaPtr& imu_inspva)
@@ -54,6 +53,7 @@ void GroundPosition::HandleImu(const novatel_gps_msgs::InspvaPtr& imu_inspva)
 
   yaw_1 = swri_math_util::WrapRadians(yaw, swri_math_util::_pi);
 }
+
 bool dd = 0;
 void GroundPosition::getPose(const geometry_msgs::PoseWithCovarianceStampedPtr& msg)
 {
@@ -73,7 +73,7 @@ void GroundPosition::getPose(const geometry_msgs::PoseWithCovarianceStampedPtr& 
     dd = 1;
   }
   // ROS_INFO("Val_init x,y: %f, %f", val_init_x, val_init_y);
-  // ROS_INFO("X: %f, Y: %f", posit.x, posit.y);
+  // ROS_INFO("X: %f, Y: %f", Coord.x, Coord.y);
 
   // O RVIZ nao gosta de numeros grandes por isso é preciso corrigir com um offset em relacao ao valor da primeira
   // medicao
