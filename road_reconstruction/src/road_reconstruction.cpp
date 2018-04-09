@@ -1,36 +1,139 @@
 
-
 #include <laser_assembler/AssembleScans2.h>
+#include <pcl/PCLPointCloud2.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
 
 using namespace laser_assembler;
+
+class RoadReconst
+{
+public:
+  RoadReconst();
+  void loop_function();
+
+private:
+  ros::NodeHandle nh_;
+  ros::Publisher pub_cloud0;
+  ros::Publisher pub_cloud3;
+  pcl::PointCloud<pcl::PointXYZ> CloudXYZ_LD0, CloudXYZ_LD3;
+  sensor_msgs::PointCloud2 CloudMsg_LD0, CloudMsg_LD3;
+  void getCloudsFromSensors();
+};
+
+RoadReconst::RoadReconst()
+{
+  pub_cloud0 = nh_.advertise<sensor_msgs::PointCloud2>("cloud_minada0", 100);
+  pub_cloud3 = nh_.advertise<sensor_msgs::PointCloud2>("cloud_minada3", 100);
+}
+void RoadReconst::loop_function()
+{
+  getCloudsFromSensors();
+  pcl::toROSMsg(CloudXYZ_LD3, CloudMsg_LD3);
+  pub_cloud3.publish(CloudMsg_LD3);
+}
+
+void RoadReconst::getCloudsFromSensors()
+{
+  ros::service::waitForService("assemble_scans0");
+  ros::ServiceClient client = nh_.serviceClient<AssembleScans2>("assemble_scans0");
+  AssembleScans2 srv;
+  srv.request.begin = ros::Time(0, 0);
+  srv.request.end = ros::Time::now();
+
+  if (client.call(srv))
+  {
+    printf("Got cloud 0 with %lu points\n", srv.response.cloud.data.size());
+    pub_cloud0.publish(srv.response.cloud);
+  }
+  else
+    printf("Service call failed\n");
+
+  ros::service::waitForService("assemble_scans3");
+  ros::ServiceClient client3 = nh_.serviceClient<AssembleScans2>("assemble_scans3");
+  AssembleScans2 srv3;
+
+  srv3.request.begin = ros::Time(0, 0);
+  srv3.request.end = ros::Time::now();
+  if (client3.call(srv3))
+  {
+    printf("Got cloud 3 with %lu points\n", srv3.response.cloud.data.size());
+    // pub_cloud3.publish(srv3.response.cloud);
+    pcl::fromROSMsg(srv3.response.cloud, CloudXYZ_LD3);
+  }
+  else
+    printf("Service call failed\n");
+}
+
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "test_client");
-  ros::NodeHandle n;
-  ros::Publisher pub_cloud = n.advertise<sensor_msgs::PointCloud2>("cloud_minada", 100);
+  ros::init(argc, argv, "RoadReconst");
+  RoadReconst reconstruct;
+
+  ros::Rate rate(20);
   while (ros::ok())
   {
-    ros::service::waitForService("assemble_scans2");
-    ros::ServiceClient client = n.serviceClient<AssembleScans2>("assemble_scans2");
-    AssembleScans2 srv;
-    ros::Rate rate(10);
-    srv.request.begin = ros::Time(0, 0);
-    srv.request.end = ros::Time::now();
-    if (client.call(srv))
-    {
-      printf("Got cloud with %lu points\n", srv.response.cloud.data.size());
-      pub_cloud.publish(srv.response.cloud);
-    }
-    else
-      printf("Service call failed\n");
-
+    reconstruct.loop_function();
     ros::spinOnce();
     rate.sleep();
   }
+
   return 0;
 }
+
+//---------------------------------------------------
+// using namespace laser_assembler;
+
+// int main(int argc, char **argv)
+// {
+//   ros::init(argc, argv, "test_client");
+//   ros::NodeHandle n;
+//   ros::Publisher pub_cloud0 = nh_.advertise<sensor_msgs::PointCloud2>("cloud_minada0", 100);
+//   ros::Publisher pub_cloud3 = n.advertise<sensor_msgs::PointCloud2>("cloud_minada3", 100);
+//   ros::Rate rate(20);
+
+//   while (ros::ok())
+//   {
+//     ros::service::waitForService("assemble_scans0");
+//     ros::ServiceClient client = n.serviceClient<AssembleScans2>("assemble_scans0");
+//     AssembleScans2 srv;
+//     srv.request.begin = ros::Time(0, 0);
+//     srv.request.end = ros::Time::now();
+
+//     if (client.call(srv))
+//     {
+//       printf("Got cloud 0 with %lu points\n", srv.response.cloud.data.size());
+//       pub_cloud0.publish(srv.response.cloud);
+//     }
+//     else
+//       printf("Service call failed\n");
+
+//     ros::service::waitForService("assemble_scans3");
+//     ros::ServiceClient client3 = n.serviceClient<AssembleScans2>("assemble_scans3");
+//     AssembleScans2 srv3;
+
+//     srv3.request.begin = ros::Time(0, 0);
+//     srv3.request.end = ros::Time::now();
+//     if (client3.call(srv3))
+//     {
+//       printf("Got cloud 3 with %lu points\n", srv3.response.cloud.data.size());
+//       pub_cloud3.publish(srv3.response.cloud);
+//     }
+//     else
+//       printf("Service call failed\n");
+
+//     ros::spinOnce();
+//     rate.sleep();
+//   }
+
+//   return 0;
+// }
+
+//--------------------------------***-------------------------------
 
 // #include <laser_geometry/laser_geometry.h>
 // #include <pcl/PCLPointCloud2.h>

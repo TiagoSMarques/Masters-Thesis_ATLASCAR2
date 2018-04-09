@@ -7,7 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /TF1/Frames1
-        - /Grid2
+        - /Acumul_31
       Splitter Ratio: 0.604477584
     Tree Height: 570
   - Class: rviz/Selection
@@ -28,7 +28,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PC_Novinha
+    SyncSource: Acumul_0
 Visualization Manager:
   Class: ""
   Displays:
@@ -532,7 +532,7 @@ Visualization Manager:
         Z: 0
       Plane: XY
       Plane Cell Count: 18
-      Reference Frame: ldmrs3
+      Reference Frame: ldmrs0
       Value: true
     - Alpha: 1
       Autocompute Intensity Bounds: true
@@ -552,18 +552,48 @@ Visualization Manager:
       Max Intensity: 4096
       Min Color: 0; 0; 0
       Min Intensity: 0
-      Name: PC_Novinha
+      Name: Acumul_0
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
       Size (Pixels): 2
       Size (m): 0.00999999978
       Style: Points
-      Topic: /cloud_minada
+      Topic: /cloud_minada0
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: false
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: Acumul_3
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 2
+      Size (m): 0.00999999978
+      Style: Points
+      Topic: /cloud_minada3
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -589,7 +619,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 30.7935333
+      Distance: 28.3306999
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
@@ -604,10 +634,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.619796395
+      Pitch: 0.634795487
       Target Frame: ground
       Value: ThirdPersonFollower (rviz)
-      Yaw: 0.857291818
+      Yaw: 1.00729191
     Saved:
       - Angle: 0
         Class: rviz/TopDownOrtho

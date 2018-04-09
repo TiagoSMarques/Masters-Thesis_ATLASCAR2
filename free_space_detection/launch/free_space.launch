@@ -19,10 +19,16 @@
   <!-- Point cloud assembler -->
   <node type="laser_scan_assembler" pkg="laser_assembler" name="my_assembler">
     <remap from="scan" to="/ld_rms/scan3"/>
+    <remap from="assemble_scans2" to="assemble_scans3"/>
     <param name="max_scans" type="int" value="200" />
     <param name="fixed_frame" type="string" value="map" />
   </node>
-  <!-- <node type="laser_scan_assembler" pkg="laser_assembler" name="my_assembler"><remap from="scan" to="/ld_rms/scan0"/><remap from="assemble_scans2" to="assembled_scans3"/><param name="max_scans" type="int" value="200" /><param name="fixed_frame" type="string" value="map" /></node> -->
+  <node type="laser_scan_assembler" pkg="laser_assembler" name="my_assembler2">
+    <remap from="scan" to="/ld_rms/scan0"/>
+    <remap from="assemble_scans2" to="assemble_scans0"/>
+    <param name="max_scans" type="int" value="200" />
+    <param name="fixed_frame" type="string" value="map" />
+  </node>
   <!-- Launch the node   -->
   <node pkg="road_reconstruction" type="road_reconstruction" name="road_reconstruction" required="true" output="screen"/>
   <!-- Launch the node   -->

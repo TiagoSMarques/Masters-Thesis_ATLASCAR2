@@ -211,7 +211,7 @@ void readCalibrationFiles(string filesPath, vector<tf::Transform> &deviceFrames,
 
     if (deviceNames[i] == "ldmrs")
     {
-      deviceNames[i] = "ldmrs0";
+      deviceNames[i] = "ldmrs3";
       deviceFrames.push_back(transform * getTf(0, 0, 0, 0, -1.6, 0));
       ld_tf = transform;
       ld_push = true;
@@ -224,9 +224,9 @@ void readCalibrationFiles(string filesPath, vector<tf::Transform> &deviceFrames,
 
   if (ld_push)
   {
-    deviceNames.push_back("ldmrs1");
     deviceNames.push_back("ldmrs2");
-    deviceNames.push_back("ldmrs3");
+    deviceNames.push_back("ldmrs1");
+    deviceNames.push_back("ldmrs0");
 
     deviceFrames.push_back(ld_tf * getTf(0, 0, 0, 0, -0.8, 0));
     deviceFrames.push_back(ld_tf * getTf(0, 0, 0, 0, 0.8, 0));
