@@ -16,4 +16,3 @@
 <!-- joint state publisher with gui -->
 <!-- <param name="use_gui" value="true" /> -->
 <!-- <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher"/> -->
-<!-- </launch> -->

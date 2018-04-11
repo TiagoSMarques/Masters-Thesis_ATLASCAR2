@@ -18,10 +18,14 @@
 
 using namespace laser_assembler;
 // using namespace pcl;
+double Raio;
+int Viz;
 
 void callback(road_reconstruction::TutorialsConfig& config, uint32_t level)
 {
-  ROS_INFO("Reconfigure Request: %d %f %s", config.int_param, config.double_param, config.str_param.c_str());
+  ROS_INFO("Reconfigure Request: %f %d", config.raio, config.viz);
+  Raio = config.raio;
+  Viz = config.viz;
 }
 
 class RoadReconst
@@ -35,6 +39,10 @@ private:
   ros::Publisher pub_cloud0, pub_cloud3, pub_cloudTotal;
   pcl::PointCloud<pcl::PointXYZ> CloudXYZ_LD0, CloudXYZ_LD3, CloudXYZ_Total;
   sensor_msgs::PointCloud2 CloudMsg_LD0, CloudMsg_LD3, CloudMsg_Total;
+
+  dynamic_reconfigure::Server<road_reconstruction::TutorialsConfig> server;
+  dynamic_reconfigure::Server<road_reconstruction::TutorialsConfig>::CallbackType f;
+
   void getCloudsFromSensors();
   void cleanCloud();
 };
@@ -48,11 +56,6 @@ RoadReconst::RoadReconst()
 void RoadReconst::loop_function()
 {
   // Buscar os parametros
-  dynamic_reconfigure::Server<road_reconstruction::TutorialsConfig> server;
-  dynamic_reconfigure::Server<road_reconstruction::TutorialsConfig>::CallbackType f;
-
-  f = boost::bind(&callback, _1, _2);
-  server.setCallback(f);
 
   getCloudsFromSensors();
   cleanCloud();
@@ -151,10 +154,12 @@ void RoadReconst::cleanCloud()
 
   if (cloud_filteredVox->size() != 0)
   {
+    f = boost::bind(&callback, _1, _2);
+    server.setCallback(f);
     // ROS_WARN("Empty Cloud");
     outrem.setInputCloud(cloud_filteredVox);
-    outrem.setRadiusSearch(0.2);
-    outrem.setMinNeighborsInRadius(16);
+    outrem.setRadiusSearch(Raio);
+    outrem.setMinNeighborsInRadius(Viz);
     // apply filter
     outrem.filter(*cloud_filteredRad);
   }
