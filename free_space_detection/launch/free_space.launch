@@ -18,15 +18,15 @@
   <node pkg="orientation_module" type="orientation_module_node" name="comunic" required="true" output="screen"/>
   <!-- Point cloud assembler -->
   <node type="laser_scan_assembler" pkg="laser_assembler" name="my_assembler">
-    <remap from="scan" to="/ld_rms/scan3"/>
+    <remap from="scan" to="/ld_rms/scan1"/>
     <remap from="assemble_scans2" to="assemble_scans3"/>
-    <param name="max_scans" type="int" value="200" />
+    <param name="max_scans" type="int" value="300" />
     <param name="fixed_frame" type="string" value="map" />
   </node>
   <node type="laser_scan_assembler" pkg="laser_assembler" name="my_assembler2">
     <remap from="scan" to="/ld_rms/scan0"/>
     <remap from="assemble_scans2" to="assemble_scans0"/>
-    <param name="max_scans" type="int" value="200" />
+    <param name="max_scans" type="int" value="300" />
     <param name="fixed_frame" type="string" value="map" />
   </node>
   <!-- Launch the node   -->
@@ -43,7 +43,7 @@
   <!-- Odometria   -->
   <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
     <param name="output_frame" value="map"/>
-    <param name="freq" value="30.0"/>
+    <param name="freq" value="50.0"/>
     <param name="sensor_timeout" value="1.0"/>
     <param name="odom_used" value="false"/>
     <param name="imu_used" value="false"/>

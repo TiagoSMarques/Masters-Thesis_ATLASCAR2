@@ -50,7 +50,8 @@ public:
     tf::Transform transform;
 
     // Receber e converter para radianos (remover o 4.8)
-    float pitch = (msg->data[0] + 4.8) * 3.1415 / 180;
+    // float pitch = (msg->data[0] + 4.8) * 3.1415 / 180;
+    float pitch = msg->data[0] * 3.1415 / 180;
     float roll = msg->data[1] * 3.1415 / 180;
     float z_mean = msg->data[2] / 1000;
     // pitch = -3.1415 / 10;

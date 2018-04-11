@@ -9,6 +9,8 @@ add_compile_options(-std=c++11)
 ## is used, also find other catkin packages
 
 find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure
+  message_generation
   roscpp
   rospy
   std_msgs
@@ -42,7 +44,7 @@ find_package(PCL REQUIRED)
 ##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
 ##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
 ##     but can be declared for certainty nonetheless:
-##     * add a run_depend tag for "message_runtime"
+##     * add a run_depend toad_reconstructionag for "message_runtime"
 ## * In this file (CMakeLists.txt):
 ##   * add "message_generation" and every package in MSG_DEP_SET to
 ##     find_package(catkin REQUIRED COMPONENTS ...)
@@ -97,10 +99,10 @@ find_package(PCL REQUIRED)
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
+ generate_dynamic_reconfigure_options(
+   cfg/Tutorials.cfg
 #   cfg/DynReconf2.cfg
-# )
+ )
 
 ###################################
 ## catkin specific configuration ##
@@ -139,21 +141,25 @@ include_directories(
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(road_reconstruction ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(road_reconstruction src/road_reconstruction.cpp)
 add_executable(assem src/assemble.cpp)
+# add_executable()
+add_dependencies(road_reconstruction ${PROJECT_NAME}_gencfg)
 
 target_link_libraries(road_reconstruction ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 target_link_libraries(assem ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 
 link_directories(${PCL_LIBRARY_DIRS})
-include_directories(${PCL_INCLUDE_DIRS})
+# include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
+
+# make sure configure headers are built before any node using them
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -172,8 +178,8 @@ add_definitions(${PCL_DEFINITIONS})
    ${PCL_LIBRARIES}
    ${PCL_COMMON_LIBRARIES}
    ${PCL_IO_LIBRARIES}
-   -lpcl_filters
 )
+
 #############
 ## Install ##
 #############
