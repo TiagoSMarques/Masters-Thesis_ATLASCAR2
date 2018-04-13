@@ -5,6 +5,7 @@
 #include <pcl/conversions.h>
 #include <pcl/filters/conditional_removal.h>
 #include <pcl/filters/radius_outlier_removal.h>
+#include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -18,14 +19,17 @@
 
 using namespace laser_assembler;
 // using namespace pcl;
-double Raio;
-int Viz;
+double Raio, StDev;
+int Viz, MeanK;
 
 void callback(road_reconstruction::TutorialsConfig& config, uint32_t level)
 {
-  ROS_INFO("Reconfigure Request: %f %d", config.raio, config.viz);
-  Raio = config.raio;
-  Viz = config.viz;
+  Raio = config.Radius;
+  Viz = config.Viz;
+  StDev = config.StDev;
+  MeanK = config.MeanK;
+
+  // ROS_INFO("Reconfigure Request: %f %d %f %d", config.raio, config.viz, StDev, MeanK);
 }
 
 class RoadReconst
@@ -49,7 +53,7 @@ private:
 
 RoadReconst::RoadReconst()
 {
-  pub_cloud0 = nh_.advertise<sensor_msgs::PointCloud2>("cloud_minada0", 100);
+  pub_cloud0 = nh_.advertise<sensor_msgs::PointCloud2>("cloud_Outliers", 100);
   pub_cloud3 = nh_.advertise<sensor_msgs::PointCloud2>("cloud_minada3", 100);
   pub_cloudTotal = nh_.advertise<sensor_msgs::PointCloud2>("cloud_Total", 100);
 }
@@ -71,7 +75,6 @@ void RoadReconst::getCloudsFromSensors()
   AssembleScans2 srv;
   srv.request.begin = ros::Time(0, 0);
   srv.request.end = ros::Time::now();
-
   if (client.call(srv))
   {
     // printf("Got cloud 0 with %lu points\n", srv.response.cloud.data.size());
@@ -92,7 +95,7 @@ void RoadReconst::getCloudsFromSensors()
   if (client3.call(srv3))
   {
     // printf("Got cloud 3 with %lu points\n", srv3.response.cloud.data.size());
-    // pub_cloud3.publish(srv3.response.cloud);
+    pub_cloud3.publish(srv3.response.cloud);
     pcl::fromROSMsg(srv3.response.cloud, CloudXYZ_LD3);
   }
   else
@@ -108,62 +111,45 @@ void RoadReconst::cleanCloud()
   // pcl::fromROSMsg(assembled_cloud_, *cloud_to_clean);
   *cloud_to_clean = (CloudXYZ_LD0 + CloudXYZ_LD3);
 
-  // try
-  // {
-  //   listener.waitForTransform("map", "ground", ros::Time(0), ros::Duration(1.0));
-  //   listener.lookupTransform("map", "ground", ros::Time(0), transformOdom);
-  // }
-  // catch (tf::TransformException& ex)
-  // {
-  //   ROS_ERROR("%s", ex.what());
-  // }
-  // // Localização da origem do ref ground
-  // float Xo = transformOdom.getOrigin().x();
-  // float Yo = transformOdom.getOrigin().y();
-  // float Zo = transformOdom.getOrigin().z();
-
-  // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
-  // pcl::ConditionAnd<pcl::PointXYZ>::Ptr range_cond(new pcl::ConditionAnd<pcl::PointXYZ>());
-
-  // // Condição para os limites da bounding box de representação da pointcloud
-  // range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-  //     new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::GT, Xo - 50)));
-  // range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
-  //     new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::LT, Xo + 50)));
-
-  // // build the filter
-  // pcl::ConditionalRemoval<pcl::PointXYZ> condrem;
-  // condrem.setCondition(range_cond);
-  // condrem.setInputCloud(cloud_to_clean);
-  // condrem.setKeepOrganized(true);
-  // // apply filter
-  // condrem.filter(*cloud_filtered);
-
   // Depois passar aqui um voxel filter para diminuir a densidade dos pontos
   pcl::VoxelGrid<pcl::PointXYZ> vg;
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filteredVox(new pcl::PointCloud<pcl::PointXYZ>);
   vg.setInputCloud(cloud_to_clean);
-  vg.setLeafSize(0.1f, 0.1f, 0.1f);
+  vg.setLeafSize(0.06f, 0.06f, 0.06f);
   vg.filter(*cloud_filteredVox);
 
   // Filtro para selecionar os pontos das zonas mais densas
 
-  pcl::RadiusOutlierRemoval<pcl::PointXYZ> outrem;
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filteredRad(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filteredStat(new pcl::PointCloud<pcl::PointXYZ>);
   // build the filter
 
   if (cloud_filteredVox->size() != 0)
   {
+    // ROS_WARN("Empty Cloud");
     f = boost::bind(&callback, _1, _2);
     server.setCallback(f);
-    // ROS_WARN("Empty Cloud");
+
+    pcl::RadiusOutlierRemoval<pcl::PointXYZ> outrem;
     outrem.setInputCloud(cloud_filteredVox);
     outrem.setRadiusSearch(Raio);
     outrem.setMinNeighborsInRadius(Viz);
-    // apply filter
     outrem.filter(*cloud_filteredRad);
+
+    if (cloud_filteredRad->size() != 0)
+    {
+      // Create the filtering object
+      pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+      sor.setInputCloud(cloud_filteredRad);
+      sor.setMeanK(MeanK);
+      sor.setStddevMulThresh(StDev);
+      // Outliers
+      // sor.setNegative(true);
+      sor.filter(*cloud_filteredStat);
+    }
   }
-  CloudXYZ_Total = *cloud_filteredRad;
+
+  CloudXYZ_Total = *cloud_filteredStat;
 }
 
 int main(int argc, char** argv)
@@ -181,3 +167,34 @@ int main(int argc, char** argv)
 
   return 0;
 }
+
+// try
+// {
+//   listener.waitForTransform("map", "ground", ros::Time(0), ros::Duration(1.0));
+//   listener.lookupTransform("map", "ground", ros::Time(0), transformOdom);
+// }
+// catch (tf::TransformException& ex)
+// {
+//   ROS_ERROR("%s", ex.what());
+// }
+// // Localização da origem do ref ground
+// float Xo = transformOdom.getOrigin().x();
+// float Yo = transformOdom.getOrigin().y();
+// float Zo = transformOdom.getOrigin().z();
+
+// pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
+// pcl::ConditionAnd<pcl::PointXYZ>::Ptr range_cond(new pcl::ConditionAnd<pcl::PointXYZ>());
+
+// // Condição para os limites da bounding box de representação da pointcloud
+// range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
+//     new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::GT, Xo - 50)));
+// range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
+//     new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::LT, Xo + 50)));
+
+// // build the filter
+// pcl::ConditionalRemoval<pcl::PointXYZ> condrem;
+// condrem.setCondition(range_cond);
+// condrem.setInputCloud(cloud_to_clean);
+// condrem.setKeepOrganized(true);
+// // apply filter
+// condrem.filter(*cloud_filtered);

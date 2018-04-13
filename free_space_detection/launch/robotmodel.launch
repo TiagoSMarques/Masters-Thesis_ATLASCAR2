@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <param name="robot_description" textfile="$(find free_space_detection)/urdf/atlas2.urdf"/>
+  <param name="ATLASCAR2" textfile="$(find free_space_detection)/urdf/atlas2.urdf"/>
   <node pkg="joint_state_publisher" type="joint_state_publisher" name="multi_joint_state_publisher">
     <param name="rate" value="20"/>
     <param name="/use_gui" value="True"/>
