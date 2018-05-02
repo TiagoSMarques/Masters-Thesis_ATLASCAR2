@@ -15,7 +15,7 @@ ax.set_xlabel('xlabel')
 ax.set_ylabel('ylabel')
 ax.set_zlabel('zlabel')
 
-ax.set_xlim([0, 35])
+ax.set_xlim([0, 45])
 ax.set_ylim([-20, 20])
 ax.set_zlim([0, 1.5])
 
@@ -37,7 +37,7 @@ start = 35.0/180*np.pi
 stop = 145.0/180.0*np.pi
 
 # mudar para 220 pontos para ter 0.5graus de amplitude
-ph = np.linspace(start, stop, 10)
+ph = np.linspace(start, stop, 22)
 n_vals = np.linspace(1, 4, 4)
 x_last = []
 y_last = []
@@ -79,7 +79,7 @@ for n in n_vals:
             y = y[0: prim_neg]
             z = z[0: prim_neg]
 
-        # ax.plot(x, y, z)
+        ax.plot(x, y, z)
         x_last.append(x[-1])  # last element of array
         y_last.append(y[-1])  # last element of array
         z_last.append(z[-1])  # last element of array
@@ -96,8 +96,8 @@ r = 3
 xs = r*np.cos(u)*np.sin(v)+centro[0]
 ys = r*np.sin(u)*np.sin(v)+centro[1]
 zs = r*np.cos(v)+0.2+centro[2]
-plt.axis('equal')
-ax.plot_wireframe(xs, ys, zs, color="r")
+# plt.axis('equal')
+# ax.plot_wireframe(xs, ys, zs, color="r")
 
 # draw the plane in the sphere
 
@@ -107,7 +107,7 @@ norm_plan = np.array([1, 1, 0.2])
 #     centro[0]-5, centro[0]+5, 2), np.linspace(centro[2]-r/2, centro[2]+r/2, 2))
 
 y_plan, z_plan = np.meshgrid(np.linspace(
-    centro[1]-5, centro[1]+5, 2), np.linspace(centro[2]-r/2, centro[2]+r/2, 2))
+    centro[1]-5, centro[1]+5, 10), np.linspace(centro[2]-r/2, centro[2]+r/2, 10))
 
 x_plan = centro[0]-1/norm_plan[0] * \
     (norm_plan[1]*(y_plan-centro[1])+norm_plan[2]*(z_plan-centro[2]))
@@ -117,15 +117,16 @@ x_plan = centro[0]-1/norm_plan[0] * \
 
 # z_plan = centro[2]-1/norm_plan[2] * \
 #     (norm_plan[1]*(y_plan-centro[1])+norm_plan[0]*(x_plan-centro[0]))
-ax.scatter(centro[0], centro[1], centro[2], c="g")
-ax.plot_surface(x_plan, y_plan, z_plan, color="r")
+
+# ax.scatter(centro[0], centro[1], centro[2], c="g")
+# ax.plot_surface(x_plan, y_plan, z_plan, rstride=1, cstride=1, alpha=0.6)
 
 num_in_plane = 0
 num_in_sphere = 0
 
-print(x_last)
-print("normal:", norm_plan, "centro:", centro)
-print("h:", h, "alpha:", alpha, "phi:", phi)
+# print(x_last)
+# print("normal:", norm_plan, "centro:", centro)
+# print("h:", h, "alpha:", alpha, "phi:", phi)
 
 for elem in range(len(x_last)):
     # verifica se o ponto esta dentro da esfera
@@ -138,7 +139,7 @@ for elem in range(len(x_last)):
         point_plain = (centro[0]-x_last[elem])*norm_plan[0]+(centro[1]-y_last[elem]) * \
             norm_plan[1]+(centro[2]-z_last[elem])*norm_plan[2]
         # se estiver
-        if point_plain >= -2 and point_plain <= 2:
+        if point_plain >= -0.5 and point_plain <= 0.5:
             num_in_plane += 1
 
 print("num pontos esfera: ", num_in_sphere)
