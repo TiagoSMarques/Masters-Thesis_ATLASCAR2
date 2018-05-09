@@ -11,9 +11,9 @@ syms x_p y_p z_p a b c r;
 rand_point=[x_p,y_p,z_p];
 normal=[a,b,c];
 
-%Plane inequality
+%Plane
 plane = (x_p-X)*a+(y_p-Y)*b+(z_p-Z)*c == 0; % pretty(plane)
-%Sphere inequality
+%Sphere
 sphere= (X-x_p)^2+(Y-y_p)^2+(Z-z_p)^2 <= r^2; % pretty(sphere)
 
 %Solve plane intersection and create a function
@@ -27,34 +27,44 @@ Func_sphere=matlabFunction(ss_sphere);
 close all;
 
 %Ajustable parameters-------------------------------------------------
-% tic
-figure(1);
-ah=axes;
+dist_travel=12; %m
+% speed=50; %km/h
+speed_arr=[20, 50, 70];
+freq=3; %Hz
 
 %Initializing---------------------------------------------------------
 pp = linspace(35.0/180*pi, 145.0/180.0*pi, 220);
 aa=linspace(1,4,4);
 
+for arr_ind=1:numel(speed_arr)
+speed=speed_arr(arr_ind);
+% ah=axes;
 Sol_points=zeros(3,1,numel(aa));
 Dens_res=zeros(2,1);
 iter=0;
 
-for ii = linspace(0,pi/2,15) %20 graus
+interv=speed*1000/freq/3600;
+travel_time=dist_travel*3600/(speed*1000);
+
+for desl_x = 0:interv:dist_travel
+% for ii = linspace(0,pi/2,20) %20 graus
+% for xx = linspace (5,30,50)
+% for var_ang = linspace(0,5,20) %20 graus
+figure(1);
+ii=pi/2;
+var_h=0.4;
+var_ang=0.6;
+xx=14;
+
 num_pontos=0;    
 iter=iter+1;
-coord_sensor=[0,0,0.4];
-centro_rand=[12,10,0.2];
-norm_rand=[0,-sin(ii),cos(ii)];
+coord_sensor=[desl_x,0,var_h];
+centro_rand=[xx,1.5,0.2];
+norm_rand=[0,-sin(ii),cos(ii)]; % para planos em y-z
+% norm_rand=[-sin(ii),0,cos(ii)]; %para planos em x-z
 
 % norm_rand=norm_rand1/norm(norm_rand1)
-raio=1;
-
-% %Center of the sphere belongs to plane
-% centro_esfera_z=0;
-% centro_esfera_y=centro_rand(2);
-% 
-% centro_esfera_x=-(norm_rand(1)*(X - x_p) - norm_rand(2)*z_p + norm_rand(3)*(Z - z_p))/b;
-% centro_esfera=[centro_esfera_x,centro_esfera_y,centro_esfera_z]
+raio=0.2;
 
 % Drawing the plane --------------------------------------------------
 w = null(norm_rand); % Find two orthonormal vectors which are orthogonal to v
@@ -63,13 +73,12 @@ w = null(norm_rand); % Find two orthonormal vectors which are orthogonal to v
 plane_X = centro_rand(1)+w(1,1)*P+w(1,2)*Q; % Compute the corresponding cartesian coordinates
 plane_Y = centro_rand(2)+w(2,1)*P+w(2,2)*Q; %   using the two vectors in w
 plane_Z = centro_rand(3)+w(3,1)*P+w(3,2)*Q;
-% surf(plane_X,plane_Y,plane_Z,'FaceColor',[1 0.4 0.6]); %'FaceAlpha',0.8
+surf(plane_X,plane_Y,plane_Z,'FaceColor',[1 0.4 0.6]); %'FaceAlpha',0.8
 hold on;
    
 %Drawing the center point --------------------------------------------
 XX=linspace(coord_sensor(1),coord_sensor(1)+35);
 scatter3(centro_rand(1),centro_rand(2),centro_rand(3),300,'.g')
-
 hold on;
 
 %Drawing the circle --------------------------------------------------
@@ -101,11 +110,12 @@ R = [u(1)^2*C+cc, u(1)*u(2)*C-u(3)*s, u(1)*u(3)*C+u(2)*s
 newPnts = R*pnts;
 
 plot3(newPnts(1,:)+centro_rand(1),newPnts(2,:)+centro_rand(2),newPnts(3,:)+centro_rand(3),'k')
-    
+hold on;
+
 % Calculating intersections-------------------------------------------
     for ind_a = 1:numel(aa)
         for ind_p = 1:numel(pp)
-            alph = (0.6+(ind_a-1)*0.8)/180.0*pi;
+            alph = (var_ang+(ind_a-1)*0.8)/180.0*pi;
             ph=pp(ind_p);
             %Drawing the beams;
             YY=(XX-coord_sensor(1))/tan(ph);
@@ -133,7 +143,6 @@ plot3(newPnts(1,:)+centro_rand(1),newPnts(2,:)+centro_rand(2),newPnts(3,:)+centr
         end
 
         %Drawing intersection points
-        hold on;
         scatter3(Sol_points(1,:,ind_a),Sol_points(2,:,ind_a),Sol_points(3,:,ind_a)...
             ,200,'.')
         hold on;grid on;
@@ -141,22 +150,37 @@ plot3(newPnts(1,:)+centro_rand(1),newPnts(2,:)+centro_rand(2),newPnts(3,:)+centr
     
     Area_circ=pi*raio^2;
     Densidade=num_pontos/Area_circ;
-    Dens_res(1,iter)=ii*180/pi;
+%    Dens_res(1,iter)=ii*180/pi;  %graph rotation
+%     Dens_res(1,iter)=xx;
+%     Dens_res(1,iter)=var_ang;
     Dens_res(2,iter)=Densidade;
 %     fprintf('Num of point: %d, density: %f \n',num_pontos,Densidade);
 % num_pontos
 end
 
 %axis
-set(ah,'ydir','reverse')
+% set(ah,'ydir','reverse')
+Dens_res(1,:)=linspace(0,travel_time,iter);
 
-xlim([0, 35]);ylim([5, 15]);zlim([0, 1]);
+xlim([12, 15]);ylim([-15, 15]);zlim([0, 1]);
 xlabel('X');ylabel('Y');zlabel('Z');
 % toc
-hold off;
+% hold on;
 
+s_centro=string(centro_rand);
 figure(2)
-plot(Dens_res(1,:),Dens_res(2,:));
-ylabel('Density');xlabel('\theta');
-% ylim([0, 5])
-grid on;
+a1=plot(Dens_res(1,:),Dens_res(2,:)); %graph rotation
+title(sprintf('Density on vertical plane in [%0.1f,%0.1f,%0.1f], radius %0.2fm, speed %dkm/h',s_centro(1),s_centro(2),s_centro(3),raio,speed))
+% title(sprintf('Density on a ground plane along X [ X,%0.1f,%0.1f], radius %0.2fm ',s_centro(2),s_centro(3),raio))
+% title(sprintf('Density on a vertical plane along Y based on sensor height and sensor angle in [%0.1f,%0.1f,%0.1f], raio %0.2fm',s_centro(1),s_centro(2),s_centro(3),raio))
+ylabel('Density');xlabel('t (s)');
+xlim([0, travel_time])
+% i_x=Dens_res(1,11);
+% i_y=Dens_res(2,11);
+% text(i_x, i_y, sprintf('h=%0.1f',var_h), 'BackgroundColor', 'w');
+% indd=find(linspace(0.2,0.8,7) == var_h);
+legendInfo{indd} = [sprintf('%0.1f',var_h)];
+grid on;hold on;
+end
+% 
+% legend(legendInfo);
