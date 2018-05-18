@@ -2,6 +2,8 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/Quaternion.h>
 #include <gps_common/GPSFix.h>
+#include <nav_msgs/Odometry.h>
+
 #include <novatel_gps_msgs/Inspva.h>
 #include <ros/ros.h>
 #include <std_msgs/String.h>
@@ -21,8 +23,8 @@ class GroundPosition
 {
 public:
   GroundPosition();
-  void getPose(const geometry_msgs::PoseWithCovarianceStampedPtr& msg);
-  void HandleImu(const novatel_gps_msgs::InspvaPtr& imu_inspva);
+  void getPose(const nav_msgs::OdometryPtr &msg);
+  void HandleImu(const novatel_gps_msgs::InspvaPtr &imu_inspva);
 
 private:
   ros::NodeHandle n;
@@ -47,7 +49,7 @@ GroundPosition::GroundPosition()
   sub_direction = n.subscribe("inspva", 100, &GroundPosition::HandleImu, this);
 }
 
-void GroundPosition::HandleImu(const novatel_gps_msgs::InspvaPtr& imu_inspva)
+void GroundPosition::HandleImu(const novatel_gps_msgs::InspvaPtr &imu_inspva)
 {
   yaw = (90.0 - imu_inspva->azimuth) * swri_math_util::_deg_2_rad;
 
@@ -55,7 +57,7 @@ void GroundPosition::HandleImu(const novatel_gps_msgs::InspvaPtr& imu_inspva)
 }
 
 bool dd = 0;
-void GroundPosition::getPose(const geometry_msgs::PoseWithCovarianceStampedPtr& msg)
+void GroundPosition::getPose(const nav_msgs::OdometryPtr &msg)
 {
   geometry_msgs::Point Coord;
   geometry_msgs::Quaternion Rot;
@@ -165,7 +167,7 @@ void GroundPosition::ground2map()
 */
 
 // Main
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "ground_tf_broadcaster");
   GroundPosition ground_pos;

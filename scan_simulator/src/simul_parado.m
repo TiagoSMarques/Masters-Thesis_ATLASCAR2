@@ -11,6 +11,7 @@ syms x_p y_p z_p a b c r;
 rand_point=[x_p,y_p,z_p];
 normal=[a,b,c];
 
+
 %Plane inequality
 plane = (x_p-X)*a+(y_p-Y)*b+(z_p-Z)*c == 0; % pretty(plane)
 %Sphere inequality
@@ -40,7 +41,7 @@ Sol_points=zeros(3,1,numel(aa));
 Dens_res=zeros(2,1);
 iter=0;
 
-for ii = linspace(0,pi/2,20) %20 graus
+for ii = linspace(pi/10,pi/2,3) %20 graus
 % for xx = linspace (5,30,50)
 % for var_ang = linspace(0,5,20) %20 graus
 figure(1);
@@ -54,7 +55,9 @@ iter=iter+1;
 coord_sensor=[0,0,var_h];
 centro_rand=[xx,1.5,0.2];
 % norm_rand=[0,-sin(ii),cos(ii)]; % para planos em y-z
-norm_rand=[-sin(ii),0,cos(ii)]; %para planos em x-z
+% norm_rand=[-sin(ii),0,cos(ii)]; %para planos em x-z
+norm_rand=[-sin(ii),cos(ii),0]; %para planos em x-y
+
 
 % norm_rand=norm_rand1/norm(norm_rand1)
 raio=1;
@@ -66,7 +69,7 @@ w = null(norm_rand); % Find two orthonormal vectors which are orthogonal to v
 plane_X = centro_rand(1)+w(1,1)*P+w(1,2)*Q; % Compute the corresponding cartesian coordinates
 plane_Y = centro_rand(2)+w(2,1)*P+w(2,2)*Q; %   using the two vectors in w
 plane_Z = centro_rand(3)+w(3,1)*P+w(3,2)*Q;
-% surf(plane_X,plane_Y,plane_Z,'FaceColor',[1 0.4 0.6]); %'FaceAlpha',0.8
+surf(plane_X,plane_Y,plane_Z,'FaceColor',[1 0.4 0.6]); %'FaceAlpha',0.8
 hold on;
    
 %Drawing the center point --------------------------------------------

@@ -22,7 +22,7 @@ using namespace laser_assembler;
 double Raio, StDev;
 int Viz, MeanK;
 
-void callback(road_reconstruction::TutorialsConfig& config, uint32_t level)
+void callback(road_reconstruction::TutorialsConfig &config, uint32_t level)
 {
   Raio = config.Radius;
   Viz = config.Viz;
@@ -53,7 +53,7 @@ private:
 
 RoadReconst::RoadReconst()
 {
-  pub_cloud0 = nh_.advertise<sensor_msgs::PointCloud2>("cloud_Outliers", 100);
+  pub_cloud0 = nh_.advertise<sensor_msgs::PointCloud2>("oud_minada2", 100);
   pub_cloud3 = nh_.advertise<sensor_msgs::PointCloud2>("cloud_minada3", 100);
   pub_cloudTotal = nh_.advertise<sensor_msgs::PointCloud2>("cloud_Total", 100);
 }
@@ -136,23 +136,23 @@ void RoadReconst::cleanCloud()
     outrem.setMinNeighborsInRadius(Viz);
     outrem.filter(*cloud_filteredRad);
 
-    if (cloud_filteredRad->size() != 0)
-    {
-      // Create the filtering object
-      pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
-      sor.setInputCloud(cloud_filteredRad);
-      sor.setMeanK(MeanK);
-      sor.setStddevMulThresh(StDev);
-      // Outliers
-      // sor.setNegative(true);
-      sor.filter(*cloud_filteredStat);
-    }
+    // if (cloud_filteredRad->size() != 0)
+    // {
+    //   // Create the filtering object
+    //   pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+    //   sor.setInputCloud(cloud_filteredRad);
+    //   sor.setMeanK(MeanK);
+    //   sor.setStddevMulThresh(StDev);
+    //   // Outliers
+    //   // sor.setNegative(true);
+    //   sor.filter(*cloud_filteredStat);
+    // }
   }
 
-  CloudXYZ_Total = *cloud_filteredStat;
+  CloudXYZ_Total = *cloud_filteredRad;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "RoadReconst");
   RoadReconst reconstruct;
