@@ -16,19 +16,51 @@
   <node pkg="orientation_module" type="frame_tf_broadcaster" name="frame_tf_broadcaster" required="true" output="screen"/>
   <!-- Launch the node   -->
   <node pkg="orientation_module" type="orientation_module_node" name="comunic" required="true" output="screen"/>
+
   <!-- Point cloud assembler -->
-  <node type="laser_scan_assembler" pkg="laser_assembler" name="my_assembler">
+  <node type="laser_scan_assembler" pkg="laser_assembler" name="my_assembler0">
+    <remap from="scan" to="/ld_rms/scan0"/>
+    <remap from="assemble_scans2" to="assemble_scans0"/>
+    <param name="max_scans" type="int" value="150" />
+    <param name="fixed_frame" type="string" value="map" />
+  </node>
+  <node type="laser_scan_assembler" pkg="laser_assembler" name="my_assembler1">
     <remap from="scan" to="/ld_rms/scan1"/>
-    <remap from="assemble_scans2" to="assemble_scans3"/>
-    <param name="max_scans" type="int" value="300" />
+    <remap from="assemble_scans2" to="assemble_scans1"/>
+    <param name="max_scans" type="int" value="150" />
     <param name="fixed_frame" type="string" value="map" />
   </node>
   <node type="laser_scan_assembler" pkg="laser_assembler" name="my_assembler2">
-    <remap from="scan" to="/ld_rms/scan0"/>
-    <remap from="assemble_scans2" to="assemble_scans0"/>
-    <param name="max_scans" type="int" value="300" />
+    <remap from="scan" to="/ld_rms/scan2"/>
+    <remap from="assemble_scans2" to="assemble_scans2_"/>
+    <param name="max_scans" type="int" value="150" />
     <param name="fixed_frame" type="string" value="map" />
   </node>
+  <node type="laser_scan_assembler" pkg="laser_assembler" name="my_assembler3">
+    <remap from="scan" to="/ld_rms/scan3"/>
+    <remap from="assemble_scans2" to="assemble_scans3"/>
+    <param name="max_scans" type="int" value="150" />
+    <param name="fixed_frame" type="string" value="map" />
+  </node>
+
+  <!-- tentativa -->
+  <!--
+  <node type="point_cloud_assembler" pkg="laser_assembler" name="ass_pt">
+    <remap from="cloud" to="cloud_minada2"/>
+    <param name="max_clouds" type="int" value="300" />
+    <param name="fixed_frame" type="string" value="map" />
+  </node> -->
+
+  <!-- tentativa -->
+  <!-- ||||||||||||||||||apagar||||||||||||| -->
+  <!-- <node type="laser_scan_assembler" pkg="laser_assembler" name="single_ass">
+    <remap from="scan" to="/ld_rms/scan3"/>
+    <remap from="assemble_scans2" to="assemble_single"/>
+    <param name="max_scans" type="int" value="1" />
+    <param name="fixed_frame" type="string" value="ground" />
+  </node> -->
+  <!-- |||||||||||||||||||||||||||||||||||||||| -->
+
   <!-- Launch the node   -->
   <node pkg="road_reconstruction" type="road_reconstruction" name="road_reconstruction" required="true" output="screen"/>
   <!-- Launch the node   -->

@@ -83,7 +83,8 @@ void GroundPosition::getPose(const nav_msgs::OdometryPtr &msg)
   Coord.y = Coord.y - val_init_y;
 
   // transformação
-  transform.setOrigin(tf::Vector3(Coord.x, Coord.y, -0.28));
+  // transform.setOrigin(tf::Vector3(Coord.x, Coord.y, -0.28));
+  transform.setOrigin(tf::Vector3(Coord.x, Coord.y, 0));
 
   // ROS_INFO("YAW: %f", yaw_1 * 180 / 3.1415);
   transform.setRotation(tf::createQuaternionFromRPY(0, 0, yaw_1));

@@ -9,6 +9,10 @@ pointgrey_camera_driver-master/
 sick_ldmrs/
 velodyne-master/
 novatel/
+rosbag_to_csv/
+scan_simulator/bags_*/
+#bags
+*.bag
 # Prerequisites
 *.d
 

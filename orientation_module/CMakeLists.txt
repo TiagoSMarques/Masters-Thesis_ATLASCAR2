@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   tf
   swri_math_util
+  laser_geometry
 )
 
 ## System dependencies are found with CMake's conventions
@@ -104,12 +105,17 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
+
+find_package(cmake_modules)
+find_package(Eigen REQUIRED)
+find_package(PCL REQUIRED)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES orientation_module
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 # swri_math_util
+DEPENDS Eigen
 )
 
 ###########
@@ -121,6 +127,8 @@ catkin_package(
 include_directories(
  include
   ${catkin_INCLUDE_DIRS}
+  ${Eigen_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -138,7 +146,6 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(${PROJECT_NAME}_node src/comunic.cpp)
 
-
 add_executable(frame_tf_broadcaster src/frame_tf_broadcaster.cpp)
 target_link_libraries(frame_tf_broadcaster ${catkin_LIBRARIES})
 ## Rename C++ executable without prefix
@@ -151,9 +158,18 @@ target_link_libraries(frame_tf_broadcaster ${catkin_LIBRARIES})
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+link_directories(${PCL_LIBRARY_DIRS})
+# include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 ## Specify libraries to link a library or executable target against
  target_link_libraries(${PROJECT_NAME}_node
    ${catkin_LIBRARIES}
+   ${Eigen_LIBRARIES}
+   ${PCL_LIBRARIES}
+   ${PCL_COMMON_LIBRARIES}
+   ${PCL_IO_LIBRARIES}
  )
 
 #############

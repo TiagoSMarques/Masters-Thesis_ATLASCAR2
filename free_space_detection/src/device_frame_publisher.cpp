@@ -293,8 +293,8 @@ int main(int argc, char **argv)
   vector<tf::Transform> deviceFrames;
   vector<string> deviceNames;
   readCalibrationFiles(calibFilesP.c_str(), deviceFrames, deviceNames);
-
-  tf::Transform LD_tf = deviceFrames[deviceFrames.size() - 1] * getTf(0, 0, 0, 0, -1.6, 0);
+  float ang_incid = 0.6;
+  tf::Transform LD_tf = deviceFrames[deviceFrames.size() - 1] * getTf(0, 0, 0, 0, -1.6 - ang_incid, 0);
 
   //  deviceFrames.push_back(getTf(0, 0, 0.5, 0, 0, 0));
   //  deviceNames.push_back("velodyne");
@@ -327,7 +327,8 @@ int main(int argc, char **argv)
 
     // Vetor entre a origem do mundo e a origem do ref do centro do carro com a mesma rotação
     // transform_final.setOrigin(transform_novo.getOrigin());
-    transform_final.setOrigin(tf::Vector3(1.772, 0, -0.168));
+    // meio do sensor esta a 33,5mm do ch�o
+    transform_final.setOrigin(tf::Vector3(1.750, 0, -0.205));
 
     transform_final.setRotation(tf::Quaternion(0, 0, 0, 1));
 
@@ -351,14 +352,7 @@ int main(int argc, char **argv)
     {
       tf::Transform T = deviceFrames[i];
       string name = deviceNames[i];
-      // if (name == "velodyne")
-      // {
-      //   br.sendTransform(tf::StampedTransform(T, ros::Time::now(), name, "map"));
-      // }
-      // else
-      // {
       br.sendTransform(tf::StampedTransform(T, ros::Time::now(), ref_sensor, name));
-      // }
     }
 
     try
