@@ -38,7 +38,7 @@ speed=50; %km/h
 freq=50; %Hz
     
 %Initializing---------------------------------------------------------
-pp = linspace(35.0/180*pi, 145.0/180.0*pi, 220);
+pp = linspace(47.5/180*pi, 132.0/180.0*pi, 170);
 aa=linspace(1,4,4);
 cycle=0;
 
@@ -46,8 +46,8 @@ figure(1);
 ah=axes;
 
 % for ii = linspace(0,pi/2,5) %20 graus
-for arr_ind=1:numel(rad_arr)
-raio=rad_arr(arr_ind);
+% for arr_ind=1:numel(rad_arr)
+% raio=rad_arr(arr_ind);
 
 % for arr_ind=1:numel(speed_arr)
 % speed=speed_arr(arr_ind);
@@ -61,7 +61,7 @@ raio=rad_arr(arr_ind);
 % for arr_ind=1:numel(ang_arr)
 % var_ang=ang_arr(arr_ind);
 
-% raio=0.2;
+raio=0.5;
 ii=pi/2;
 var_h=0.4;
 var_ang=0.6;
@@ -76,14 +76,14 @@ interv=speed*1000/freq/3600;
 travel_time=dist_travel*3600/(speed*1000);
 
 num_pontos=0; 
-    for desl_x = 0:interv:dist_travel
+    for desl_x=1:2:50% desl_x = 0:interv:dist_travel
     % for ii = linspace(0,pi/2,20) %20 graus
     % for xx = linspace (5,30,50)
     % for var_ang = linspace(0,5,20) %20 graus
 
     iter=iter+1;
     coord_sensor=[desl_x,0,var_h];
-    centro_rand=[14,1.5,0.2];
+    centro_rand=[14,-4.5,0.2];
     norm_rand=[0,-sin(ii),cos(ii)]; % para planos em y-z
     % norm_rand=[-sin(ii),0,cos(ii)]; %para planos em x-z
 %     norm_rand=[-sin(ii),cos(ii),0]; %para planos em x-y
@@ -97,12 +97,12 @@ num_pontos=0;
     plane_X = centro_rand(1)+w(1,1)*P+w(1,2)*Q; % Compute the corresponding cartesian coordinates
     plane_Y = centro_rand(2)+w(2,1)*P+w(2,2)*Q; %   using the two vectors in w
     plane_Z = centro_rand(3)+w(3,1)*P+w(3,2)*Q;
-    surf(plane_X,plane_Y,plane_Z,'FaceColor',[1 0.4 0.6]); %'FaceAlpha',0.8
+%     surf(plane_X,plane_Y,plane_Z,'FaceColor',[0.701, 0.701, 0.701]); %'FaceAlpha',0.8
     hold on;
 
     %Drawing the center point --------------------------------------------
     XX=linspace(coord_sensor(1),coord_sensor(1)+35);
-    scatter3(centro_rand(1),centro_rand(2),centro_rand(3),150,'.g')
+%     scatter3(centro_rand(1),centro_rand(2),centro_rand(3),150,'.g')
     hold on;
 
     %Drawing the circle --------------------------------------------------
@@ -144,7 +144,7 @@ num_pontos=0;
                 %Drawing the beams;
                 YY=(XX-coord_sensor(1))/tan(ph);
                 ZZ = coord_sensor(3)-(XX-coord_sensor(1))*tan(alph);
-    %             plot3(XX,YY,ZZ);
+%                 plot3(XX,YY,ZZ,'r');
                 hold on;
                 %Itersections with the plane (only for X > 0)
                 sol_X=Func_X(norm_rand(1),alph,norm_rand(2),norm_rand(3),coord_sensor(3),ph,...
@@ -154,7 +154,7 @@ num_pontos=0;
 
                 sol_Z=coord_sensor(3)-(sol_X-coord_sensor(1))*tan(alph);
                 %para vaolres positivos e acima do ground
-                if sol_X >=0 && sol_Z>=0
+                if sol_X >=0 && sol_Z>=0 && sol_Z<=0.20
                     %verifica se o ponto esta dentro da esfera
                     result=Func_sphere(norm_rand(1),alph,norm_rand(2),norm_rand(3),coord_sensor(3),ph,...
                         coord_sensor(1),centro_rand(1),centro_rand(2),centro_rand(3));
@@ -168,7 +168,7 @@ num_pontos=0;
 
             %Drawing intersection points
             scatter3(Sol_points(1,:,ind_a),Sol_points(2,:,ind_a),Sol_points(3,:,ind_a)...
-                ,200,'.')
+                ,100,'.k')
             hold on;grid on;
         end
 
@@ -186,11 +186,15 @@ num_pontos=0;
 set(ah,'ydir','reverse')
 % Dens_res(1,:)=linspace(0,travel_time,iter);
 
-xlim([12, 15]);ylim([-15, 15]);zlim([0, 1]);
+xlim([13, 15]);ylim([-15, 15]);zlim([0, 1.5]);
+axis('square')
+% xlim([0, 35]);ylim([-15, 15]);zlim([0, 0.7]);
 xlabel('X');ylabel('Y');zlabel('Z');
 % toc
 % hold on;
-
+figure(1)
+patch([0 35 35 0], [-4.5 -4.5 -4.5 -4.5], [0 0 0.2 0.2], [0.701, 0.701, 0.701]);
+view(0,0)
 s_centro=string(centro_rand);
 figure(2)
 a1=plot(Dens_res(1,:),Dens_res(2,:)); %graph rotation
@@ -209,6 +213,6 @@ legendInfo{cycle} = [sprintf('%0.1fm',raio)];
 % legendInfo{cycle} = [sprintf('%0.1fm',var_h)];
 % legendInfo{cycle} = [sprintf('%0.1fº',var_ang)];
 grid on;hold on;
-end
+% end
 % 
 legend(legendInfo);

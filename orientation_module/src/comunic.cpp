@@ -73,7 +73,7 @@ public:
     roll = msg->data[1] * 3.1415 / 180;
     z_mean = msg->data[2] / 1000;
 
-    // pitch = -3.1415 / 10;
+    // roll = -3.1415 / 30;
     // ROS_INFO("P: %f, R: %f, Z_m: %f", msg->data[0] + 4.8, msg->data[1], z_mean);
     // aqui depois colocar zmean
     transform.setOrigin(tf::Vector3(1.175, 0, z_mean));

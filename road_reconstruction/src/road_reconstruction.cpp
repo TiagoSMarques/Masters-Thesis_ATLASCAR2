@@ -49,7 +49,7 @@ private:
   pcl::PointCloud<pcl::PointXYZ> CloudXYZ_LD0, CloudXYZ_LD1, CloudXYZ_LD2, CloudXYZ_LD3, CloudXYZ_Total;
   sensor_msgs::PointCloud2 CloudMsg_LD0, CloudMsg_LD3, CloudMsg_Total, Cloud_Reconst;
 
-  pcl::PointCloud<pcl::PointXYZ> Inter1, Inter2, RoadRec;
+  pcl::PointCloud<pcl::PointXYZ> Inter1, Inter2, InterM, RoadRec;
 
   dynamic_reconfigure::Server<road_reconstruction::TutorialsConfig> server;
   dynamic_reconfigure::Server<road_reconstruction::TutorialsConfig>::CallbackType f;
@@ -151,10 +151,12 @@ void RoadReconst::getCloudsFromSensors()
 
   //------------------Assemble all an publish---------------
 
-  Inter1 = CloudXYZ_LD0 + CloudXYZ_LD1;
-  Inter2 = CloudXYZ_LD2 + CloudXYZ_LD3;
-  RoadRec = Inter1 + Inter2;
-  pcl::toROSMsg(Inter1, Cloud_Reconst);
+  Inter1 = CloudXYZ_LD0 + CloudXYZ_LD1; // 1-2 | first 2
+  Inter2 = CloudXYZ_LD2 + CloudXYZ_LD3; // 3-4 | last 2
+
+  InterM = Inter1 + CloudXYZ_LD2; // first 3 clouds
+  RoadRec = Inter1 + Inter2;      // all clouds
+  pcl::toROSMsg(InterM, Cloud_Reconst);
   pub_road_rec.publish(Cloud_Reconst);
 }
 
