@@ -24,6 +24,8 @@
 
 //-----------------
 #include <fstream>
+#include <math.h>
+#include <cmath>
 #include <iostream>
 //---------------------
 
@@ -67,7 +69,6 @@ private:
 
 // Subscriber for velocity data
 ros::Subscriber sub_getVel;
-float N_vel, E_vel, U_vel;
 
   // apagar-------------------
   ros::Publisher pub_cloud_simple;
@@ -78,14 +79,18 @@ float N_vel, E_vel, U_vel;
   void getCloudsFromSensors();
   void cleanCloud();
 
+float carVelocity;
   void getVelocity(const novatel_gps_msgs::Inspva &velMsg);
 };
 
 RoadRec::getVelocity(const novatel_gps_msgs::Inspva &velMsg){
 
+float N_vel, E_vel, U_vel;
 N_vel=velMsg->north_velocity;
 E_vel=velMsg->east_velocity;
 U_vel=velMsg->up_velocity;
+
+carVelocity=sqrt(std::pow(N_vel,2) + std::pow(S_vel,2) + std::pow(U_vel,2));
 
 }
 
