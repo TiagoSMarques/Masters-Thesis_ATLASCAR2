@@ -18,6 +18,10 @@
 
 #include <sensor_msgs/PointCloud2.h>
 
+//  #include <novatel_gps_driver/novatel_gps.h>
+#include <novatel_gps_msgs/Inspva.h>
+
+
 //-----------------
 #include <fstream>
 #include <iostream>
@@ -40,7 +44,13 @@ void callback(road_reconstruction::TutorialsConfig &config, uint32_t level)
 class RoadReconst
 {
 public:
+  //publicadores
   RoadReconst();
+
+  //Subscritores
+  sub_getVel=nh_.subscribe("inspva",10,&RoadRec::getVelocity, this);
+
+  //Filter the cloud based on recieved data
   void loop_function();
 
 private:
@@ -54,6 +64,11 @@ private:
   dynamic_reconfigure::Server<road_reconstruction::TutorialsConfig> server;
   dynamic_reconfigure::Server<road_reconstruction::TutorialsConfig>::CallbackType f;
 
+
+// Subscriber for velocity data
+ros::Subscriber sub_getVel;
+float N_vel, E_vel, U_vel;
+
   // apagar-------------------
   ros::Publisher pub_cloud_simple;
   pcl::PointCloud<pcl::PointXYZ> CloudXYZ_Simple;
@@ -62,10 +77,21 @@ private:
 
   void getCloudsFromSensors();
   void cleanCloud();
+
+  void getVelocity(const novatel_gps_msgs::Inspva &velMsg);
 };
+
+RoadRec::getVelocity(const novatel_gps_msgs::Inspva &velMsg){
+
+N_vel=velMsg->north_velocity;
+E_vel=velMsg->east_velocity;
+U_vel=velMsg->up_velocity;
+
+}
 
 RoadReconst::RoadReconst()
 {
+  sensor_msgs::PointCloud2 CloudMsg_Simple;
   // pub_cloud0 = nh_.advertise<sensor_msgs::PointCloud2>("cloud_minada2", 100);
   // pub_cloud3 = nh_.advertise<sensor_msgs::PointCloud2>("cloud_minada3", 100);
   pub_road_rec = nh_.advertise<pcl::PointCloud<pcl::PointXYZ>>("road_reconstruction", 1);
@@ -73,6 +99,7 @@ RoadReconst::RoadReconst()
   // apagar-------------------------
   pub_cloud_simple = nh_.advertise<sensor_msgs::PointCloud2>("cloud_simple", 100);
 }
+
 void RoadReconst::loop_function()
 {
   // Buscar os parametros
@@ -277,7 +304,7 @@ int main(int argc, char **argv)
 // {
 //   ROS_ERROR("%s", ex.what());
 // }
-// // Localização da origem do ref ground
+// // Localizaï¿½ï¿½o da origem do ref ground
 // float Xo = transformOdom.getOrigin().x();
 // float Yo = transformOdom.getOrigin().y();
 // float Zo = transformOdom.getOrigin().z();
@@ -285,7 +312,7 @@ int main(int argc, char **argv)
 // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
 // pcl::ConditionAnd<pcl::PointXYZ>::Ptr range_cond(new pcl::ConditionAnd<pcl::PointXYZ>());
 
-// // Condição para os limites da bounding box de representação da pointcloud
+// // Condiï¿½ï¿½o para os limites da bounding box de representaï¿½ï¿½o da pointcloud
 // range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
 //     new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::GT, Xo - 50)));
 // range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
