@@ -21,11 +21,10 @@
 //  #include <novatel_gps_driver/novatel_gps.h>
 #include <novatel_gps_msgs/Inspva.h>
 
-
 //-----------------
-#include <fstream>
 #include <math.h>
 #include <cmath>
+#include <fstream>
 #include <iostream>
 //---------------------
 
@@ -46,13 +45,11 @@ void callback(road_reconstruction::TutorialsConfig &config, uint32_t level)
 class RoadReconst
 {
 public:
-  //publicadores
+  // publicadores
   RoadReconst();
 
-  //Subscritores
-  sub_getVel=nh_.subscribe("inspva",10,&RoadRec::getVelocity, this);
-
-  //Filter the cloud based on recieved data
+  // Filter the cloud based on recieved data
+  void getVelocity(const novatel_gps_msgs::InspvaPtr &velMsg);
   void loop_function();
 
 private:
@@ -66,9 +63,8 @@ private:
   dynamic_reconfigure::Server<road_reconstruction::TutorialsConfig> server;
   dynamic_reconfigure::Server<road_reconstruction::TutorialsConfig>::CallbackType f;
 
-
-// Subscriber for velocity data
-ros::Subscriber sub_getVel;
+  // Subscriber for velocity data
+  ros::Subscriber sub_getVel;
 
   // apagar-------------------
   ros::Publisher pub_cloud_simple;
@@ -79,23 +75,34 @@ ros::Subscriber sub_getVel;
   void getCloudsFromSensors();
   void cleanCloud();
 
-float carVelocity;
-  void getVelocity(const novatel_gps_msgs::Inspva &velMsg);
+  float RaioSpeed, VizSpeed;
 };
 
-RoadRec::getVelocity(const novatel_gps_msgs::Inspva &velMsg){
+void RoadReconst::getVelocity(const novatel_gps_msgs::InspvaPtr &velMsg)
+{
+  float N_vel, E_vel, U_vel;
+  N_vel = velMsg->north_velocity;
+  E_vel = velMsg->east_velocity;
+  U_vel = velMsg->up_velocity;
 
-float N_vel, E_vel, U_vel;
-N_vel=velMsg->north_velocity;
-E_vel=velMsg->east_velocity;
-U_vel=velMsg->up_velocity;
+  float carVelocity = sqrt(std::pow(N_vel, 2) + std::pow(E_vel, 2) + std::pow(U_vel, 2));
+  // RaioSpeed = carVelocity / 50.0 + carVelocity / 200;
+  RaioSpeed = 0.2;
 
-carVelocity=sqrt(std::pow(N_vel,2) + std::pow(S_vel,2) + std::pow(U_vel,2));
+  // VizSpeed = floor(carVelocity * 125.0 / 8.0 * 3.14 * std::pow(0.2, 2));
+  VizSpeed = floor(4540 / carVelocity);
+  // VizSpeed = 15;
 
+  // ROS_INFO("Vels: %f %f %f and total %f", N_vel, E_vel, U_vel, carVelocity);
+  ROS_INFO("Car_vel %f Filt Rad %f Viz %f", carVelocity, RaioSpeed, VizSpeed);
 }
 
 RoadReconst::RoadReconst()
 {
+  // Subscritores
+  sub_getVel = nh_.subscribe("inspva", 10, &RoadReconst::getVelocity, this);
+
+  // Publish clouds
   sensor_msgs::PointCloud2 CloudMsg_Simple;
   // pub_cloud0 = nh_.advertise<sensor_msgs::PointCloud2>("cloud_minada2", 100);
   // pub_cloud3 = nh_.advertise<sensor_msgs::PointCloud2>("cloud_minada3", 100);
@@ -222,8 +229,8 @@ void RoadReconst::cleanCloud()
 
     pcl::RadiusOutlierRemoval<pcl::PointXYZ> outrem;
     outrem.setInputCloud(cloud_filteredVox);
-    outrem.setRadiusSearch(Raio);
-    outrem.setMinNeighborsInRadius(Viz);
+    outrem.setRadiusSearch(RaioSpeed);
+    outrem.setMinNeighborsInRadius(VizSpeed);
     outrem.filter(*cloud_filteredRad);
 
     // if (cloud_filteredRad->size() != 0)
