@@ -90,6 +90,7 @@ void RoadReconst::getVelocity(const novatel_gps_msgs::InspvaPtr &velMsg)
   RaioSpeed = 0.2;
 
   // VizSpeed = floor(carVelocity * 125.0 / 8.0 * 3.14 * std::pow(0.2, 2));
+  //Equação deduzida pelo simulador para uma dist de acumulação de 4m
   VizSpeed = floor(4540 / carVelocity);
   // VizSpeed = 15;
 
