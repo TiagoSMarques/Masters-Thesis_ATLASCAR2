@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   tf
+  novatel_gps_msgs
   swri_math_util
   laser_geometry
 )
@@ -171,6 +172,7 @@ add_definitions(${PCL_DEFINITIONS})
    ${PCL_COMMON_LIBRARIES}
    ${PCL_IO_LIBRARIES}
  )
+
 
 #############
 ## Install ##
