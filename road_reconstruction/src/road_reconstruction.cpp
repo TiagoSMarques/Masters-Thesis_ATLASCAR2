@@ -90,7 +90,7 @@ void RoadReconst::getVelocity(const novatel_gps_msgs::InspvaPtr &velMsg)
   RaioSpeed = 0.2;
 
   // VizSpeed = floor(carVelocity * 125.0 / 8.0 * 3.14 * std::pow(0.2, 2));
-  // Equação deduzida pelo simulador para uma dist de acumulação de 4m para um raio de 0.2m
+  // Equação deduzida pelo simulador para uma dist de acumulação de 4m para um raio de 0.2m 222
   VizSpeed = floor(4540 / carVelocity);
   // VizSpeed = 15;
 
@@ -191,11 +191,11 @@ void RoadReconst::getCloudsFromSensors()
 
   //------------------Assemble all an publish---------------
 
-  Inter1 = CloudXYZ_LD0 + CloudXYZ_LD1;  // 1-2 | first 2
-  Inter2 = CloudXYZ_LD2 + CloudXYZ_LD3;  // 3-4 | last 2
+  Inter1 = CloudXYZ_LD0 + CloudXYZ_LD1; // 1-2 | first 2
+  Inter2 = CloudXYZ_LD2 + CloudXYZ_LD3; // 3-4 | last 2
 
-  InterM = Inter1 + CloudXYZ_LD2;  // first 3 clouds
-  RoadRec = Inter1 + Inter2;       // all clouds
+  InterM = Inter1 + CloudXYZ_LD2; // first 3 clouds
+  RoadRec = Inter1 + Inter2;      // all clouds
   pcl::toROSMsg(InterM, Cloud_Reconst);
   pub_road_rec.publish(Cloud_Reconst);
 }
