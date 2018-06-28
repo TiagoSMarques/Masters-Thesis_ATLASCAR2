@@ -90,7 +90,7 @@ void GroundPosition::getPose(const nav_msgs::OdometryPtr &msg)
   transform.setRotation(tf::createQuaternionFromRPY(0, 0, yaw_1));
 
   // publicar tensformação entre o referencial do mundo e o ground
-  br.sendTransform(tf::StampedTransform(transform, msg->header.stamp, "map", "ground"));
+  br.sendTransform(tf::StampedTransform(transform, msg->header.stamp, "map", "base_link_imu"));
 
   // ground2map();
   TracePath(Coord);

@@ -2,6 +2,7 @@
 
 #include <laser_assembler/AssembleScans2.h>
 #include <pcl/PCLPointCloud2.h>
+#include <pcl/common/common.h>
 #include <pcl/conversions.h>
 #include <pcl/filters/conditional_removal.h>
 #include <pcl/filters/radius_outlier_removal.h>
@@ -87,11 +88,11 @@ void RoadReconst::getVelocity(const novatel_gps_msgs::InspvaPtr &velMsg)
 
   float carVelocity = sqrt(std::pow(N_vel, 2) + std::pow(E_vel, 2) + std::pow(U_vel, 2));
   // RaioSpeed = carVelocity / 50.0 + carVelocity / 200;
-  RaioSpeed = 0.2;
+  RaioSpeed = 0.22;
 
   // VizSpeed = floor(carVelocity * 125.0 / 8.0 * 3.14 * std::pow(0.2, 2));
   // Equação deduzida pelo simulador para uma dist de acumulação de 4m para um raio de 0.2m 222
-  VizSpeed = floor(4540 / carVelocity);
+  VizSpeed = floor(4540 / carVelocity * std::pow(0.2, 2));
   // VizSpeed = 15;
 
   // ROS_INFO("Vels: %f %f %f and total %f", N_vel, E_vel, U_vel, carVelocity);
@@ -189,15 +190,56 @@ void RoadReconst::getCloudsFromSensors()
   else
     printf("Service call failed\n");
 
+  // Apagar isto depois -----------------------
+  ros::service::waitForService("assemble_single");
+  ros::ServiceClient client_simple = nh_.serviceClient<AssembleScans2>("assemble_single");
+  AssembleScans2 srv_simple;
+  srv_simple.request.begin = ros::Time(0, 0);
+  srv_simple.request.end = ros::Time::now();
+  if (client_simple.call(srv_simple))
+  {
+    // printf("Got cloud 0 with %lu points\n", srv.response.cloud.data.size());
+    pub_cloud_simple.publish(srv_simple.response.cloud);
+    pcl::fromROSMsg(srv_simple.response.cloud, CloudXYZ_Simple);
+  }
+  else
+  {
+    printf("Service call failed\n");
+  }
+  //---------------------------------------------
+  // std::ofstream myfile;
+  // myfile.open("/home/tiago/catkin_ws_path/src/result_point.txt", std::ios::out | std::ios::app);
+
+  // for (size_t i = 0; i < CloudXYZ_Simple.points.size(); i++)
+  // {
+  //   if (i == 51)  // 48 para o scan0; 41 para scan3
+  //   {
+  //     float S_x = CloudXYZ_Simple.points[i].x;
+  //     float S_y = CloudXYZ_Simple.points[i].y;
+  //     float S_z = CloudXYZ_Simple.points[i].z;
+  //     myfile << S_x << "\t" << S_y << "\t" << S_z << '\n';
+  //     ROS_INFO("Ponto %i: %f %f %f", i, S_x, S_y, S_z);
+  //   }
+  // }
+  // myfile.close();
+  // // ROS_INFO("Ponto: %f %f %f", Xpoint, Ypoint, Zpoint);
+
+  // ROS_INFO("---------Nova Cloud-------------");
+  // Apagar isto depois -----------------------
+
   //------------------Assemble all an publish---------------
 
-  Inter1 = CloudXYZ_LD0 + CloudXYZ_LD1; // 1-2 | first 2
-  Inter2 = CloudXYZ_LD2 + CloudXYZ_LD3; // 3-4 | last 2
+  Inter1 = CloudXYZ_LD0 + CloudXYZ_LD1;  // 1-2 | first 2
+  Inter2 = CloudXYZ_LD2 + CloudXYZ_LD3;  // 3-4 | last 2
 
-  InterM = Inter1 + CloudXYZ_LD2; // first 3 clouds
-  RoadRec = Inter1 + Inter2;      // all clouds
-  pcl::toROSMsg(InterM, Cloud_Reconst);
+  InterM = Inter1 + CloudXYZ_LD2;  // first 3 clouds
+  RoadRec = Inter1 + Inter2;       // all clouds
+  pcl::toROSMsg(Inter1, Cloud_Reconst);
   pub_road_rec.publish(Cloud_Reconst);
+
+  pcl::PointXYZ minPt, maxPt;
+  pcl::getMinMax3D(InterM, minPt, maxPt);
+  ROS_INFO("Minim:%f  Maxim:%f", minPt.z, maxPt.z);
 }
 
 void RoadReconst::cleanCloud()
@@ -208,6 +250,40 @@ void RoadReconst::cleanCloud()
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_to_clean(new pcl::PointCloud<pcl::PointXYZ>);
   // pcl::fromROSMsg(assembled_cloud_, *cloud_to_clean);
   *cloud_to_clean = RoadRec;
+
+  // try
+  // {
+  //   listener.waitForTransform("map", "base_link_imu", ros::Time(0), ros::Duration(1.0));
+  //   listener.lookupTransform("map", "base_link_imu", ros::Time(0), transformOdom);
+  // }
+  // catch (tf::TransformException &ex)
+  // {
+  //   ROS_ERROR("%s", ex.what());
+  // }
+  // // Localizaï¿½ï¿½o da origem do ref ground
+  // float Xo = transformOdom.getOrigin().x();
+  // float Yo = transformOdom.getOrigin().y();
+  // float Zo = transformOdom.getOrigin().z();
+
+  // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_border_filter(new pcl::PointCloud<pcl::PointXYZ>);
+  // pcl::ConditionAnd<pcl::PointXYZ>::Ptr range_cond(new pcl::ConditionAnd<pcl::PointXYZ>());
+
+  // // Condiï¿½ï¿½o para os limites da bounding box de representaï¿½ï¿½o da pointcloud
+  // range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
+  //     new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::GT, Xo - 2)));
+  // range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
+  //     new pcl::FieldComparison<pcl::PointXYZ>("x", pcl::ComparisonOps::LT, Xo + 30)));
+
+  // // range_cond->addComparison(pcl::FieldComparison<pcl::PointXYZ>::ConstPtr(
+  // //     new pcl::FieldComparison<pcl::PointXYZ>("y", pcl::ComparisonOps::GT, Yo - 10)));
+
+  // // build the filter
+  // pcl::ConditionalRemoval<pcl::PointXYZ> condrem;
+  // condrem.setCondition(range_cond);
+  // condrem.setInputCloud(cloud_to_clean);
+  // condrem.setKeepOrganized(true);
+  // // apply filter
+  // condrem.filter(*cloud_border_filter);
 
   // Depois passar aqui um voxel filter para diminuir a densidade dos pontos
   pcl::VoxelGrid<pcl::PointXYZ> vg;
@@ -266,31 +342,6 @@ int main(int argc, char **argv)
   return 0;
 }
 
-// Apagar isto depois -----------------------
-// ros::service::waitForService("assemble_single");
-// ros::ServiceClient client_simple = nh_.serviceClient<AssembleScans2>("assemble_single");
-// AssembleScans2 srv_simple;
-// srv_simple.request.begin = ros::Time(0, 0);
-// srv_simple.request.end = ros::Time::now();
-// if (client_simple.call(srv_simple))
-// {
-//   // printf("Got cloud 0 with %lu points\n", srv.response.cloud.data.size());
-//   pub_cloud_simple.publish(srv_simple.response.cloud);
-//   pcl::fromROSMsg(srv_simple.response.cloud, CloudXYZ_Simple);
-// }
-// else
-// {
-//   printf("Service call failed\n");
-// }
-// //---------------------------------------------
-
-// size_t ii = 0;
-// float Xpoint = CloudXYZ_Simple.points[ii].x;
-// float Ypoint = CloudXYZ_Simple.points[ii].y;
-// float Zpoint = CloudXYZ_Simple.points[ii].z;
-// ROS_INFO("Ponto: %f %f %f", Xpoint, Ypoint, Zpoint);
-
-// ROS_INFO("---------Nova Cloud-------------");
 //-------wrinting to file-------------
 // std::ofstream myfile;
 // myfile.open("/home/tiago/catkin_ws_path/src/result_point.txt", std::ios::out | std::ios::app);
