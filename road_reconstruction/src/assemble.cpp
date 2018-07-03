@@ -156,7 +156,7 @@ class CloudAssembler
 {
 public:
   CloudAssembler();
-  void cloudCallback(const sensor_msgs::PointCloud2& cloud);
+  void cloudCallback(const sensor_msgs::PointCloud2 &cloud);
 
 private:
   ros::NodeHandle node_;
@@ -199,7 +199,7 @@ CloudAssembler::CloudAssembler()
   assemblerPaused_ = false;
 }
 
-void CloudAssembler::cloudCallback(const sensor_msgs::PointCloud2& cloud)
+void CloudAssembler::cloudCallback(const sensor_msgs::PointCloud2 &cloud)
 {
   addToBuffer(cloud);
   assembleCloud();
@@ -282,7 +282,7 @@ void CloudAssembler::cleanCloud()
     listener.waitForTransform("map", "ground", ros::Time(0), ros::Duration(2.0));
     listener.lookupTransform("map", "ground", ros::Time(0), transformOdom);
   }
-  catch (tf::TransformException& ex)
+  catch (tf::TransformException &ex)
   {
     ROS_ERROR("%s", ex.what());
   }
@@ -340,9 +340,9 @@ bool CloudAssembler::pauseSrv(std_srvs::Empty::Request& req, std_srvs::Empty::Re
 }
 */
 
-};  // namespace
+};  // namespace cloud_assembler
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "cloud_assembler");
   cloud_assembler::CloudAssembler cloud_assembler;
