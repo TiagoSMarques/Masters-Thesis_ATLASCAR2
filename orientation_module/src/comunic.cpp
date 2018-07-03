@@ -76,14 +76,13 @@ public:
     // roll = -3.1415 / 30;
     // roll = 0;
     // pitch = 0;
-    // z_mean = 0.42;
     // ROS_INFO("P: %f, R: %f, Z_m: %f", msg->data[0] + 4.8, msg->data[1], z_mean);
     // aqui depois colocar zmean
     transform.setOrigin(tf::Vector3(1.175, 0, z_mean));
     transform.setRotation(tf::createQuaternionFromRPY(roll, pitch, 0));
 
     // publicar a tranformada entre o chassis do carro e a estrada
-    br.sendTransform(tf::StampedTransform(transform, Time::now(), "base_link_imu", "car_center"));
+    br.sendTransform(tf::StampedTransform(transform, Time::now(), "ground", "car_center"));
   }
 
 private:

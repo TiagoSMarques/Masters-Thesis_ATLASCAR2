@@ -24,6 +24,7 @@
 
 //-----------------
 #include <math.h>
+#include <algorithm>  // std::max
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -68,9 +69,9 @@ private:
   ros::Subscriber sub_getVel;
 
   // apagar-------------------
-  ros::Publisher pub_cloud_simple;
-  pcl::PointCloud<pcl::PointXYZ> CloudXYZ_Simple;
-  sensor_msgs::PointCloud2 CloudMsg_Simple;
+  // ros::Publisher pub_cloud_simple;
+  // pcl::PointCloud<pcl::PointXYZ> CloudXYZ_Simple;
+  // sensor_msgs::PointCloud2 CloudMsg_Simple;
   // apagar-------------------
 
   void getCloudsFromSensors();
@@ -87,13 +88,23 @@ void RoadReconst::getVelocity(const novatel_gps_msgs::InspvaPtr &velMsg)
   U_vel = velMsg->up_velocity;
 
   float carVelocity = sqrt(std::pow(N_vel, 2) + std::pow(E_vel, 2) + std::pow(U_vel, 2));
-  // RaioSpeed = carVelocity / 50.0 + carVelocity / 200;
-  RaioSpeed = 0.22;
 
-  // VizSpeed = floor(carVelocity * 125.0 / 8.0 * 3.14 * std::pow(0.2, 2));
-  // Equação deduzida pelo simulador para uma dist de acumulação de 4m para um raio de 0.2m 222
-  VizSpeed = floor(4540 / carVelocity * std::pow(0.2, 2));
-  // VizSpeed = 15;
+  //---------Metodo dinamico 2 ------------------
+  // RaioSpeed = 0.18;  // 0.18 e 14 são valores estaticos bons
+  RaioSpeed = carVelocity / 50.0 + carVelocity / 350;
+  float minLimit_Rad = 0.09;
+  float minLimit_Viz = 6;
+  // // limitar um raio minimo
+  RaioSpeed = std::max(RaioSpeed, minLimit_Rad);
+
+  VizSpeed = std::max((float)floor(carVelocity * 125.0 / 8.0 * 3.14 * std::pow(0.2, 2)), minLimit_Viz);
+
+  //---------Metodo dinamico 1 ------------------
+  // Equação deduzida pelo simulador para uma dist de acumulação de 4m para um raio de 0.2m
+  // float maxLimit_Viz = 42;
+  // RaioSpeed = 0.2;
+  // VizSpeed = std::max((float)floor(4540 / carVelocity * std::pow(0.2, 2)), minLimit_Viz);
+  // VizSpeed = std::min(VizSpeed, maxLimit_Viz);
 
   // ROS_INFO("Vels: %f %f %f and total %f", N_vel, E_vel, U_vel, carVelocity);
   ROS_INFO("Car_vel %f Filt Rad %f Viz %f", carVelocity, RaioSpeed, VizSpeed);
@@ -111,7 +122,7 @@ RoadReconst::RoadReconst()
   pub_road_rec = nh_.advertise<pcl::PointCloud<pcl::PointXYZ>>("road_reconstruction", 1);
   pub_cloudTotal = nh_.advertise<sensor_msgs::PointCloud2>("cloud_Total", 100);
   // apagar-------------------------
-  pub_cloud_simple = nh_.advertise<sensor_msgs::PointCloud2>("cloud_simple", 100);
+  // pub_cloud_simple = nh_.advertise<sensor_msgs::PointCloud2>("cloud_simple", 100);
 }
 
 void RoadReconst::loop_function()
@@ -191,21 +202,21 @@ void RoadReconst::getCloudsFromSensors()
     printf("Service call failed\n");
 
   // Apagar isto depois -----------------------
-  ros::service::waitForService("assemble_single");
-  ros::ServiceClient client_simple = nh_.serviceClient<AssembleScans2>("assemble_single");
-  AssembleScans2 srv_simple;
-  srv_simple.request.begin = ros::Time(0, 0);
-  srv_simple.request.end = ros::Time::now();
-  if (client_simple.call(srv_simple))
-  {
-    // printf("Got cloud 0 with %lu points\n", srv.response.cloud.data.size());
-    pub_cloud_simple.publish(srv_simple.response.cloud);
-    pcl::fromROSMsg(srv_simple.response.cloud, CloudXYZ_Simple);
-  }
-  else
-  {
-    printf("Service call failed\n");
-  }
+  // ros::service::waitForService("assemble_single");
+  // ros::ServiceClient client_simple = nh_.serviceClient<AssembleScans2>("assemble_single");
+  // AssembleScans2 srv_simple;
+  // srv_simple.request.begin = ros::Time(0, 0);
+  // srv_simple.request.end = ros::Time::now();
+  // if (client_simple.call(srv_simple))
+  // {
+  //   // printf("Got cloud 0 with %lu points\n", srv.response.cloud.data.size());
+  //   pub_cloud_simple.publish(srv_simple.response.cloud);
+  //   pcl::fromROSMsg(srv_simple.response.cloud, CloudXYZ_Simple);
+  // }
+  // else
+  // {
+  //   printf("Service call failed\n");
+  // }
   //---------------------------------------------
   // std::ofstream myfile;
   // myfile.open("/home/tiago/catkin_ws_path/src/result_point.txt", std::ios::out | std::ios::app);
@@ -234,12 +245,12 @@ void RoadReconst::getCloudsFromSensors()
 
   InterM = Inter1 + CloudXYZ_LD2;  // first 3 clouds
   RoadRec = Inter1 + Inter2;       // all clouds
-  pcl::toROSMsg(Inter1, Cloud_Reconst);
+  pcl::toROSMsg(InterM, Cloud_Reconst);
   pub_road_rec.publish(Cloud_Reconst);
 
   pcl::PointXYZ minPt, maxPt;
-  pcl::getMinMax3D(InterM, minPt, maxPt);
-  ROS_INFO("Minim:%f  Maxim:%f", minPt.z, maxPt.z);
+  pcl::getMinMax3D(Inter1, minPt, maxPt);
+  // ROS_INFO("Minim:%f  Maxim:%f", minPt.z, maxPt.z);
 }
 
 void RoadReconst::cleanCloud()
@@ -253,8 +264,8 @@ void RoadReconst::cleanCloud()
 
   // try
   // {
-  //   listener.waitForTransform("map", "base_link_imu", ros::Time(0), ros::Duration(1.0));
-  //   listener.lookupTransform("map", "base_link_imu", ros::Time(0), transformOdom);
+  //   listener.waitForTransform("map", "ground", ros::Time(0), ros::Duration(1.0));
+  //   listener.lookupTransform("map", "ground", ros::Time(0), transformOdom);
   // }
   // catch (tf::TransformException &ex)
   // {

@@ -1,4 +1,4 @@
-
+ 
 %% Laser Scans
 clear all;
 
@@ -33,17 +33,18 @@ close all;
 speed_arr=5:10:85;
 
 rad_arr=[0.1 0.2 0.5 1];
-h_arr=[0.2 0.3 0.4 0.5 0.6];
-ang_arr=[0 0.6 1.2 1.8 2.4 3.6];
+
+h_arr=[0.3 0.4 0.5 0.6];
+ang_arr=[0 0.6 1.2 1.8];
 
 dist_travel=12; %m
 speed=50; %km/h
 freq=50; %Hz
     
 %Initializing---------------------------------------------------------
-pp = linspace(47.5/180*pi, 132.0/180.0*pi, 170);
+pp = linspace(47.5/180*pi, 132.0/180.0*pi, 170); % 47.5/180*pi, 132.0/180.0*pi, 170
 aa=1:4; %4 laser scans
-aa2=1:3;
+aa2=1:4;
 cycle=0;
 
 figure(1);
@@ -56,19 +57,19 @@ ah=axes;
 % for arr_ind=1:numel(speed_arr)
 % speed=speed_arr(arr_ind);
 
-for arr_ind=1:numel(speed_arr)
-speed=speed_arr(arr_ind);
+% for arr_ind=1:numel(speed_arr)
+% speed=speed_arr(arr_ind);
 
-% for arr_ind=1:numel(h_arr)
-% var_h=h_arr(arr_ind);
-
-% for arr_ind=1:numel(ang_arr)
-% var_ang=ang_arr(arr_ind);
+for arr_ind=1:numel(h_arr)
+var_h=h_arr(arr_ind);
+cycle=0;
+for arr_ind_ang=1:numel(ang_arr)
+var_ang=ang_arr(arr_ind_ang);
 
 raio=0.2;
 ii=pi/2;
-var_h=0.4;
-var_ang=0.6;
+% var_h=0.4;
+% var_ang=0.6;
     
 cycle=cycle+1;
 % ah=axes;
@@ -79,7 +80,8 @@ iter=0;
 interv=speed*1000/freq/3600;
 travel_time=dist_travel*3600/(speed*1000);
 
-num_pontos=0; 
+num_pontos=0;
+
     for desl_x = 0:interv:dist_travel
     % for ii = linspace(0,pi/2,20) %20 graus
     % for xx = linspace (5,30,50)
@@ -87,7 +89,7 @@ num_pontos=0;
 
     iter=iter+1;
     coord_sensor=[desl_x,0,var_h];
-    centro_rand=[14,-4.5,0.2];
+    centro_rand=[14,1.5,0.2];
     norm_rand=[0,-sin(ii),cos(ii)]; % para planos em y-z
     % norm_rand=[-sin(ii),0,cos(ii)]; %para planos em x-z
 %     norm_rand=[-sin(ii),cos(ii),0]; %para planos em x-y
@@ -143,8 +145,8 @@ num_pontos=0;
     % Calculating intersections-------------------------------------------
         for ind_a = 1:numel(aa2)
             for ind_p = 1:numel(pp)
-                %alph = (var_ang+(ind_a-1)*0.8)/180.0*pi; %4 laser scans
-                alph = (var_ang+(ind_a)*0.8)/180.0*pi;  %2laser scans
+                alph = (var_ang+(ind_a-1)*0.8)/180.0*pi; %4 laser scans
+%                 alph = (var_ang+(ind_a)*0.8)/180.0*pi;  %2laser scans
                 
                 ph=pp(ind_p);
                 %Drawing the beams;
@@ -190,11 +192,11 @@ num_pontos=0;
     
 
 % Dens_res
-acc_dist=find(floor(Dens_res(1,:))==5,1,'first'); %4m of accum
+acc_dist=find(floor(Dens_res(1,:))==8,1,'first'); %4m of accum
 % Dens_res(1,acc_dist)
-SpeedInfl(1,cycle)=speed;
+SpeedInfl(1,cycle)=var_ang;
 SpeedInfl(2,cycle)=Dens_res(2,acc_dist);
-    
+fprintf("angle:%f height:%f density:%f x:%f\n",var_ang,var_h,Dens_res(2,acc_dist),Dens_res(1,acc_dist));
     
     
 %axis
@@ -212,6 +214,7 @@ xlabel('X');ylabel('Y');zlabel('Z');
 % patch([0 35 35 0], [-4.5 -4.5 -4.5 -4.5], [0 0 0.2 0.2], [0.701, 0.701, 0.701]);
 view(0,0)
 
+end
 end
 %
 s_centro=string(centro_rand);

@@ -90,7 +90,7 @@ void GroundPosition::getPose(const nav_msgs::OdometryPtr &msg)
   transform.setRotation(tf::createQuaternionFromRPY(0, 0, yaw_1));
 
   // publicar tensformação entre o referencial do mundo e o ground
-  br.sendTransform(tf::StampedTransform(transform, msg->header.stamp, "map", "base_link_imu"));
+  br.sendTransform(tf::StampedTransform(transform, msg->header.stamp, "map", "ground"));
 
   // ground2map();
   TracePath(Coord);
@@ -130,42 +130,6 @@ void GroundPosition::TracePath(geometry_msgs::Point Coord)
   line_strip.points = pontos;
   marker_pub.publish(line_strip);
 }
-
-/*
-void GroundPosition::ground2map()
-{
-  // Antigo
-  // transform_ekf.setOrigin(tf::Vector3(-(0.5 + 2.550 / 2), 0, -0.28));
-  // transform_ekf.setOrigin(tf::Vector3(dist_tot / 10, 0, -0.28));
-  // transform_ekf.setRotation(tf::createQuaternionFromRPY(0, 0, yaw));
-  // transform.setRotation(tf::Quaternion(0, 0, 0, 1));
-
-  try
-  {
-    listener.lookupTransform("map", "base_footprint_frame", ros::Time(0), transform_ekf);
-  }
-  catch (tf::TransformException ex)
-  {
-    ROS_ERROR("%s", ex.what());
-    ros::Duration(1.0).sleep();
-  }
-  ROS_INFO("Aqui!!!");
-  // get roll pitch yaw from transform_robot_pose_ekf
-  double roll_1, pitch_1, yaw_1;
-  tf::Quaternion q1 = transform_ekf.getRotation();
-  tf::Matrix3x3(q1).getRPY(roll_1, pitch_1, yaw_1);
-  // ROS_INFO("R: %f, P: %f, Y: %f", roll_1, pitch_1, yaw_1);
-  tf::Transform transform;
-
-  // transformação
-  transform.setOrigin(tf::Vector3((transform_ekf.getOrigin()).x() / 100, (transform_ekf.getOrigin()).y() / 100, 0));
-  // ROS_INFO("X: %f, Y: %f", transform_ekf.getOrigin().x(), transform_ekf.getOrigin().y());
-  transform.setRotation(tf::createQuaternionFromRPY(0.0, 0.0, yaw_1));
-
-  // publicar tensformação entre o referencial do mundo e o ground
-  br.sendTransform(tf::StampedTransform(transform, transform_ekf.stamp_, "map", "ground"));
-}
-*/
 
 // Main
 int main(int argc, char **argv)

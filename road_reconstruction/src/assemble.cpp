@@ -279,8 +279,8 @@ void CloudAssembler::cleanCloud()
   *cloud_to_clean = assembled_cloud_;
   try
   {
-    listener.waitForTransform("map", "base_link_imu", ros::Time(0), ros::Duration(2.0));
-    listener.lookupTransform("map", "base_link_imu", ros::Time(0), transformOdom);
+    listener.waitForTransform("map", "ground", ros::Time(0), ros::Duration(2.0));
+    listener.lookupTransform("map", "ground", ros::Time(0), transformOdom);
   }
   catch (tf::TransformException &ex)
   {
@@ -340,7 +340,7 @@ bool CloudAssembler::pauseSrv(std_srvs::Empty::Request& req, std_srvs::Empty::Re
 }
 */
 
-}; // namespace cloud_assembler
+};  // namespace cloud_assembler
 
 int main(int argc, char **argv)
 {

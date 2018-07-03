@@ -38,7 +38,7 @@ speed=50; %km/h
 freq=50; %Hz
     
 %Initializing---------------------------------------------------------
-pp = linspace(47.5/180*pi, 132.0/180.0*pi, 170);
+pp = linspace(47.5/180*pi, 132.0/180.0*pi, 170); %47.5/180*pi, 132.0/180.0*pi, 170
 aa=linspace(1,4,4);
 cycle=0;
 
@@ -58,13 +58,13 @@ ah=axes;
 % for arr_ind=1:numel(h_arr)
 % var_h=h_arr(arr_ind);
 
-% for arr_ind=1:numel(ang_arr)
-% var_ang=ang_arr(arr_ind);
+for arr_ind=1:numel(ang_arr)
+var_ang=ang_arr(arr_ind);
 
-raio=0.5;
+raio=0.2;
 ii=pi/2;
 var_h=0.4;
-var_ang=0.6;
+% var_ang=0.6;
     
 cycle=cycle+1;
 % ah=axes;
@@ -76,14 +76,14 @@ interv=speed*1000/freq/3600;
 travel_time=dist_travel*3600/(speed*1000);
 
 num_pontos=0; 
-    for desl_x=1:2:50% desl_x = 0:interv:dist_travel
+    for desl_x=0:interv:dist_travel% desl_x = 0:interv:dist_travel
     % for ii = linspace(0,pi/2,20) %20 graus
     % for xx = linspace (5,30,50)
     % for var_ang = linspace(0,5,20) %20 graus
 
     iter=iter+1;
     coord_sensor=[desl_x,0,var_h];
-    centro_rand=[14,-4.5,0.2];
+    centro_rand=[14,1.5,0.2];
     norm_rand=[0,-sin(ii),cos(ii)]; % para planos em y-z
     % norm_rand=[-sin(ii),0,cos(ii)]; %para planos em x-z
 %     norm_rand=[-sin(ii),cos(ii),0]; %para planos em x-y
@@ -154,7 +154,7 @@ num_pontos=0;
 
                 sol_Z=coord_sensor(3)-(sol_X-coord_sensor(1))*tan(alph);
                 %para vaolres positivos e acima do ground
-                if sol_X >=0 && sol_Z>=0 && sol_Z<=0.20
+                if sol_X >=0 && sol_Z>=0
                     %verifica se o ponto esta dentro da esfera
                     result=Func_sphere(norm_rand(1),alph,norm_rand(2),norm_rand(3),coord_sensor(3),ph,...
                         coord_sensor(1),centro_rand(1),centro_rand(2),centro_rand(3));
@@ -209,10 +209,10 @@ ylabel('Density');xlabel('X (m)');
 % text(i_x, i_y, sprintf('h=%0.1f',var_h), 'BackgroundColor', 'w');
 % indd=find(linspace(0.2,0.8,7) == var_h);
 % legendInfo{cycle} = [sprintf('%0.2fº',ii*180/pi)];
-legendInfo{cycle} = [sprintf('%0.1fm',raio)];
+legendInfo{cycle} = [sprintf('%0.1fm',var_ang)];
 % legendInfo{cycle} = [sprintf('%0.1fm',var_h)];
 % legendInfo{cycle} = [sprintf('%0.1fº',var_ang)];
 grid on;hold on;
-% end
+end
 % 
 legend(legendInfo);
