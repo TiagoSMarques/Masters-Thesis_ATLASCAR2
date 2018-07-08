@@ -76,14 +76,18 @@ rosrun rosserial_python serial_node.py /dev/port_name
 
 Additionally you may need to manually calibrate the inclinometer module, for this, after running the previous command go to the white pvc box containing the Arduino and press the button located on the inside of this box.
 
+## Additional notes 
+To view the representation of the filtered cloud in a satellite view, refer to the mapviz package:
+
+* [SWRI Mapviz package](https://github.com/swri-robotics/mapviz)
 
 ## Built For the ROS environment
 
-* [ROS](hthttp://www.ros.org/about-ros/) - The Robot Operating System
+* [ROS](hthttp://www.ros.org/about-ros) - The Robot Operating System
 
 ## Authors
 
-* **Tiago Marques** - *Master's Thesis* - [Universidade de Aveiro](https://github.com/TiagoSMarques)
+* **Tiago Marques** - *[Master's Thesis](https://github.com/TiagoSMarques)* - Universidade de Aveiro
 
 <!-- See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project. -->
 
@@ -91,7 +95,7 @@ Additionally you may need to manually calibrate the inclinometer module, for thi
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details -->
 
-## Acknowledgments
+<!-- ## Acknowledgments -->
 
 <!-- * Hat tip to anyone whose code was used
 * Inspiration
