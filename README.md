@@ -56,7 +56,7 @@ Once the compilation has finished re-add the moved packages to the src/ folder a
 
 ## Setup of the hardware and launching the nodes
 
-In the AtlasCar2, connect the Arduino and GPS (2 ports) USB's, and the Ethernet port (with its IP already configured), and launch the nodes for the drivers for the lasers:
+In the AtlasCar2, connect the Arduino and GPS (2 ports) USB's, and the Ethernet port (with its IP already configured), and launch the nodes for the drivers of the lasers:
 
 ```
 roslaunch free_space_detection drivers.launch 
@@ -74,28 +74,7 @@ Finally launch the road reconstruction system, which launches all the nodes need
 rosrun rosserial_python serial_node.py /dev/port_name
 ```
 
-
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
-
+Additionally you may need to manually calibrate the inclinometer module, for this, after running the previous command go to the white pvc box containing the Arduino and press the button located on the inside of this box.
 
 
 ## Built For the ROS environment
