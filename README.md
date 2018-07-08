@@ -63,7 +63,7 @@ roslaunch free_space_detection drivers.launch
 ```
 
 Then launch the node to run the inclinometer module, replacing "port_name" with the device name refering to the Arduino USB:
-
+(https://github.com/TiagoSMarques)
 ```
 rosrun rosserial_python serial_node.py /dev/port_name
 ```
@@ -71,7 +71,7 @@ rosrun rosserial_python serial_node.py /dev/port_name
 Finally launch the road reconstruction system, which launches all the nodes needed, and presents the point cloud data in Rviz for visualization:
 
 ```
-rosrun rosserial_python serial_node.py /dev/port_name
+roslaunch road_reconstruction road_rec.launch
 ```
 
 Additionally you may need to manually calibrate the inclinometer module, for this, after running the previous command go to the white pvc box containing the Arduino and press the button located on the inside of this box.
