@@ -13,7 +13,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
-#include <visualization_msgs/Marker.h>  //Messages on sreen
+#include <visualization_msgs/Marker.h> //Messages on sreen
 
 // Data types
 #include <std_msgs/Float32.h>
@@ -83,6 +83,13 @@ public:
 
     // publicar a tranformada entre o chassis do carro e a estrada
     br.sendTransform(tf::StampedTransform(transform, Time::now(), "ground", "car_center"));
+
+    //-----writing to file -------------
+    // std::ofstream myfile;
+    // myfile.open("/home/tiago/catkin_ws_path/src/result_ori.txt", std::ios::out | std::ios::app);
+    // myfile << pitch << "\t" << roll << "\t" << z_mean << '\n';
+    // myfile.close();
+    //-----writing to file--------------
   }
 
 private:
