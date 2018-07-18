@@ -89,18 +89,22 @@ void RoadReconst::getVelocity(const novatel_gps_msgs::InspvaPtr &velMsg)
 
   float carVelocity = sqrt(std::pow(N_vel, 2) + std::pow(E_vel, 2) + std::pow(U_vel, 2));
 
-  //---------Metodo dinamico 2 ------------------
-  // RaioSpeed = 0.18;  // 0.18 e 14 são valores estaticos bons
-  RaioSpeed = carVelocity / 50.0 + carVelocity / 350;
-  float minLimit_Rad = 0.09;
-  float minLimit_Viz = 6;
-  // // limitar um raio minimo
-  RaioSpeed = std::max(RaioSpeed, minLimit_Rad);
+  //---------Metodo Estatico --------------------
+  RaioSpeed = 0.19;
+  VizSpeed = 13;
 
-  VizSpeed = std::max((float)floor(carVelocity * 125.0 / 8.0 * 3.14 * std::pow(0.2, 2)), minLimit_Viz);
+  //---------Metodo dinamico 2 ------------------
+  // RaioSpeed = carVelocity / 50.0 + carVelocity / 350;
+  // float minLimit_Rad = 0.09;
+  // float minLimit_Viz = 6;
+  // // // limitar um raio minimo
+  // RaioSpeed = std::max(RaioSpeed, minLimit_Rad);
+
+  // VizSpeed = std::max((float)floor(carVelocity * 125.0 / 8.0 * 3.14 * std::pow(0.2, 2)), minLimit_Viz);
 
   //---------Metodo dinamico 1 ------------------
   // Equação deduzida pelo simulador para uma dist de acumulação de 4m para um raio de 0.2m
+  // float minLimit_Viz = 6;
   // float maxLimit_Viz = 42;
   // RaioSpeed = 0.2;
   // VizSpeed = std::max((float)floor(4540 / carVelocity * std::pow(0.2, 2)), minLimit_Viz);
