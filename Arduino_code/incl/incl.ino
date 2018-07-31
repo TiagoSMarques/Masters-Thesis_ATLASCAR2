@@ -5,15 +5,13 @@
 
 #include <std_msgs/String.h>
 
-#include <sensor_msgs/Imu.h>
-
 // Program headers
 //#include <SoftwareSerial.h>
 #include <LiquidCrystal.h>
 #include <math.h>
 
 int count = 0;
-int count_display = 0;
+int count_display=0;
 
 // Definir entradas do LCD
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
@@ -79,7 +77,6 @@ float dist_3_4 = 875;
 
 // Definir variavel de calibracao
 int calival = 0;
-float state = 0;
 
 ros::NodeHandle nh;
 
@@ -91,24 +88,9 @@ ros::Publisher Inclin_pub("DadosInclin", &DadosInclin);
 
 char dim0_label[] = "DadosInclin";
 
-void Calibrate(const sensor_msgs::Imu &Calibrate)
-{
-  float imuData = Calibrate.orientation.x;
-
-  if (imuData = !0 && state == 0)
-  {
-    state = 1;
-    calival = 1;
-  }
-}
-
-ros::Subscriber<sensor_msgs::Imu> AutoCalib("\imu", &Calibrate);
-
 void setup()
 {
   nh.initNode();
-
-  nh.subscribe(AutoCalib);
 
   // inicializar o array limpinho
   // DadosInclin.data.clear();
@@ -122,7 +104,7 @@ void setup()
   DadosInclin.layout.dim[0].label = dim0_label;
   DadosInclin.layout.dim[0].size = 3;
   DadosInclin.layout.dim[0].stride = 1 * 3;
-  DadosInclin.layout.dim_length = 0; // tirar esta linha se der chatices
+  DadosInclin.layout.dim_length = 0;  // tirar esta linha se der chatices
   DadosInclin.layout.data_offset = 0;
 
   // Defenição do array de dados concreto
@@ -150,6 +132,8 @@ void setup()
 void loop()
 {
   // Ler e guardar valor da entrada digital
+
+  char state = '!';
 
   calival = digitalRead(cali);
 
@@ -184,14 +168,14 @@ void loop()
   // }
 
   // Introducao do valor de calibracao****
-  if (calival == 1)
+  if (calival == 1 || state == 'C')
   {
     distance1 = sensor1Vall;
     distance2 = sensor2Vall;
     distance3 = sensor3Vall;
     distance4 = sensor4Vall;
 
-    // state = '!';
+    state = '!';
   }
 
   // Efectuar calibracao******************
@@ -252,24 +236,22 @@ void loop()
 
   roll = (roll_1 + roll_2) / 2;
 
-  if (count_display == 25)
-  {
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    //*************************
-    //**************************
-    lcd.print("Pitch:");
-    lcd.print(pitch, 5);
-    //****************************
-    lcd.setCursor(0, 1);
-    //****************************
-    lcd.print("Roll:");
-    lcd.print(roll, 5);
-    count_display = 0;
+if (count_display==25){
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  //*************************
+  //**************************
+  lcd.print("Pitch:");
+  lcd.print(pitch, 5);
+  //****************************
+  lcd.setCursor(0, 1);
+  //****************************
+  lcd.print("Roll:");
+  lcd.print(roll, 5);
+  count_display=0;
   }
-  else
-  {
-    count_display++;
+  else{
+  count_display++;
   }
 
   float z_mean = (sensor1Vall + sensor2Vall + sensor3Vall + sensor4Vall) / 4;
