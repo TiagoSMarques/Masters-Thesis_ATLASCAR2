@@ -28,7 +28,10 @@ close all;
 
 %Ajustable parameters-------------------------------------------------
 
-speed_arr=[70, 50, 20];
+% speed_arr=[70, 50, 20];
+% speed_arr=5:2.5:90;
+speed_arr=5:10:85;
+
 rad_arr=[0.1 0.2 0.5 1];
 h_arr=[0.2 0.3 0.4 0.5 0.6];
 ang_arr=[0 0.6 1.2 1.8 2.4 3.6];
@@ -38,8 +41,9 @@ speed=50; %km/h
 freq=50; %Hz
     
 %Initializing---------------------------------------------------------
-pp = linspace(47.5/180*pi, 132.0/180.0*pi, 170); %47.5/180*pi, 132.0/180.0*pi, 170
-aa=linspace(1,4,4);
+pp = linspace(47.5/180*pi, 132.0/180.0*pi, 170);
+aa=1:4; %4 laser scans
+aa2=1:3;
 cycle=0;
 
 figure(1);
@@ -52,23 +56,23 @@ ah=axes;
 % for arr_ind=1:numel(speed_arr)
 % speed=speed_arr(arr_ind);
 
-% for arr_ind=1:numel(speed_arr)
-% speed=speed_arr(arr_ind);
+for arr_ind=1:numel(speed_arr)
+speed=speed_arr(arr_ind);
 
 % for arr_ind=1:numel(h_arr)
 % var_h=h_arr(arr_ind);
 
-for arr_ind=1:numel(ang_arr)
-var_ang=ang_arr(arr_ind);
+% for arr_ind=1:numel(ang_arr)
+% var_ang=ang_arr(arr_ind);
 
 raio=0.2;
 ii=pi/2;
 var_h=0.4;
-% var_ang=0.6;
+var_ang=0.6;
     
 cycle=cycle+1;
 % ah=axes;
-Sol_points=zeros(3,1,numel(aa));
+Sol_points=zeros(3,1,numel(aa2));
 Dens_res=zeros(2,1);
 iter=0;
 
@@ -76,14 +80,14 @@ interv=speed*1000/freq/3600;
 travel_time=dist_travel*3600/(speed*1000);
 
 num_pontos=0; 
-    for desl_x=0:interv:dist_travel% desl_x = 0:interv:dist_travel
+    for desl_x = 0:interv:dist_travel
     % for ii = linspace(0,pi/2,20) %20 graus
     % for xx = linspace (5,30,50)
     % for var_ang = linspace(0,5,20) %20 graus
 
     iter=iter+1;
     coord_sensor=[desl_x,0,var_h];
-    centro_rand=[14,1.5,0.2];
+    centro_rand=[14,-4.5,0.2];
     norm_rand=[0,-sin(ii),cos(ii)]; % para planos em y-z
     % norm_rand=[-sin(ii),0,cos(ii)]; %para planos em x-z
 %     norm_rand=[-sin(ii),cos(ii),0]; %para planos em x-y
@@ -137,9 +141,11 @@ num_pontos=0;
     hold on;
 
     % Calculating intersections-------------------------------------------
-        for ind_a = 1:numel(aa)
+        for ind_a = 1:numel(aa2)
             for ind_p = 1:numel(pp)
-                alph = (var_ang+(ind_a-1)*0.8)/180.0*pi;
+                %alph = (var_ang+(ind_a-1)*0.8)/180.0*pi; %4 laser scans
+                alph = (var_ang+(ind_a)*0.8)/180.0*pi;  %2laser scans
+                
                 ph=pp(ind_p);
                 %Drawing the beams;
                 YY=(XX-coord_sensor(1))/tan(ph);
@@ -181,23 +187,38 @@ num_pontos=0;
     %     fprintf('Num of point: %d, density: %f \n',num_pontos,Densidade);
     % num_pontos
     end
+    
 
+% Dens_res
+acc_dist=find(floor(Dens_res(1,:))==5,1,'first'); %4m of accum
+% Dens_res(1,acc_dist)
+SpeedInfl(1,cycle)=speed;
+SpeedInfl(2,cycle)=Dens_res(2,acc_dist);
+    
+    
+    
 %axis
 set(ah,'ydir','reverse')
 % Dens_res(1,:)=linspace(0,travel_time,iter);
 
-xlim([13, 15]);ylim([-15, 15]);zlim([0, 1.5]);
-axis('square')
+% xlim([13, 15]);ylim([-15, 15]);zlim([0, 1.5]);
+xlim([0, 35]);ylim([-15, 15]);zlim([0, 1.5]);
+% axis('square')
 % xlim([0, 35]);ylim([-15, 15]);zlim([0, 0.7]);
 xlabel('X');ylabel('Y');zlabel('Z');
 % toc
 % hold on;
-figure(1)
-patch([0 35 35 0], [-4.5 -4.5 -4.5 -4.5], [0 0 0.2 0.2], [0.701, 0.701, 0.701]);
+% figure(1)
+% patch([0 35 35 0], [-4.5 -4.5 -4.5 -4.5], [0 0 0.2 0.2], [0.701, 0.701, 0.701]);
 view(0,0)
+
+end
+%
 s_centro=string(centro_rand);
 figure(2)
-a1=plot(Dens_res(1,:),Dens_res(2,:)); %graph rotation
+% a1=plot(Dens_res(1,:),Dens_res(2,:)); %graph rotation
+a1=plot(SpeedInfl(1,:),SpeedInfl(2,:));
+
 title(sprintf('Density on vertical plane in [%0.1f,%0.1f,%0.1f], radius %0.2fm, speed %dkm/h',s_centro(1),s_centro(2),s_centro(3),raio,speed))
 % title(sprintf('Density on a ground plane along X [ X,%0.1f,%0.1f], radius %0.2fm ',s_centro(2),s_centro(3),raio))
 % title(sprintf('Density on a vertical plane along Y based on sensor height and sensor angle in [%0.1f,%0.1f,%0.1f], raio %0.2fm',s_centro(1),s_centro(2),s_centro(3),raio))
@@ -209,10 +230,9 @@ ylabel('Density');xlabel('X (m)');
 % text(i_x, i_y, sprintf('h=%0.1f',var_h), 'BackgroundColor', 'w');
 % indd=find(linspace(0.2,0.8,7) == var_h);
 % legendInfo{cycle} = [sprintf('%0.2fº',ii*180/pi)];
-legendInfo{cycle} = [sprintf('%0.1fm',var_ang)];
+% legendInfo{cycle} = [sprintf('%0.1fm',speed)];
 % legendInfo{cycle} = [sprintf('%0.1fm',var_h)];
 % legendInfo{cycle} = [sprintf('%0.1fº',var_ang)];
 grid on;hold on;
-end
-% 
-legend(legendInfo);
+
+% legend(legendInfo);
